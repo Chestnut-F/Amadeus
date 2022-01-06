@@ -2,14 +2,16 @@
 
 struct VSInput
 {
-    float3 position : POSITION0;
-    float4 color : COLOR;
+    float3 position : POSITION;
+    float3 normal : NORMAL;
+    float4 tangent : TANGENT;
+    float2 uv : TEXCOORD;
 };
 
 struct VSOutput
 {
     float4 position : SV_POSITION;
-    float4 color : COLOR;
+    float2 uv : TEXCOORD;
 };
 
 cbuffer CameraConstants : register(b0)
@@ -21,14 +23,20 @@ cbuffer CameraConstants : register(b0)
     float farPlane;
 };
 
+cbuffer ModelConstants : register(b2)
+{
+    float4x4 modelMatrix;
+};
+
 [RootSignature(Renderer_RootSig)]
 VSOutput main(VSInput input)
 {
     VSOutput output;
 
-    float4 pos = mul(float4(input.position, 1.0f), viewMatrix);
-    output.position = mul(pos, projectionMatrix);
-    output.color = input.color;
+    float4 posW = mul(float4(input.position, 1.0f), modelMatrix);
+    float4 posV = mul(posW, viewMatrix);
+    output.position = mul(posV, projectionMatrix);
+    output.uv = input.uv;
 
     return output;
 }

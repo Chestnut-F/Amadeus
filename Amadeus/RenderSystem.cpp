@@ -3,22 +3,21 @@
 
 namespace Amadeus
 {
-	RenderSystem::RenderSystem()
+	RenderSystem::RenderSystem(SharedPtr<DeviceResources> device, size_t jobs)
+		: mRenderThread(1, L"RenderThread")
+		, mJobSystem(jobs, L"JobThread")
+		, mJobs(jobs)
 	{
-	}
-
-	void RenderSystem::Submit(ID3D12CommandList* commandList)
-	{
-		ppCommandLists.emplace_back(commandList);
 	}
 
 	void RenderSystem::Render(SharedPtr<DeviceResources> device)
 	{
-		device->GetCommandQueue()->ExecuteCommandLists(ppCommandLists.size(), ppCommandLists.data());
-
 		device->Present();
+	}
 
-		ppCommandLists.clear();
+	void RenderSystem::Upload(SharedPtr<DeviceResources> device)
+	{
+		device->WaitForGpu();
 	}
 
 	void RenderSystem::Destroy()

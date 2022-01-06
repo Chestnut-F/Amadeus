@@ -48,9 +48,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
     <ClInclude Include="Root.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -86,12 +83,6 @@
     </ClInclude>
     <ClInclude Include="Common\WorkQueue.h">
       <Filter>Common</Filter>
-    </ClInclude>
-    <ClInclude Include="Camera.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="CameraManager.h">
-      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Enums.h">
       <Filter>Header Files</Filter>
@@ -129,6 +120,45 @@
     <ClInclude Include="RenderPassRegistry.h">
       <Filter>Render Pass\Header</Filter>
     </ClInclude>
+    <ClInclude Include="Camera.h">
+      <Filter>Resource Manager\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="CameraManager.h">
+      <Filter>Resource Manager\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="ResourceManagers.h">
+      <Filter>Resource Manager\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="Material.h">
+      <Filter>Resource Manager\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="MaterialManager.h">
+      <Filter>Resource Manager\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="Texture.h">
+      <Filter>Resource Manager\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="TextureManager.h">
+      <Filter>Resource Manager\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\ThreadPool.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="GltfLoader.h">
+      <Filter>Resource Manager\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="Mesh.h">
+      <Filter>Resource Manager\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="MeshManager.h">
+      <Filter>Resource Manager\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="Primitive.h">
+      <Filter>Resource Manager\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\RootSignature.h">
+      <Filter>Common</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Root.cpp">
@@ -141,12 +171,6 @@
       <Filter>Common</Filter>
     </ClCompile>
     <ClCompile Include="FrameGraph.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Camera.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="CameraManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Common\DescriptorManager.cpp">
@@ -176,6 +200,36 @@
     <ClCompile Include="RenderPassRegistry.cpp">
       <Filter>Render Pass\Source</Filter>
     </ClCompile>
+    <ClCompile Include="Camera.cpp">
+      <Filter>Resource Manager\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="CameraManager.cpp">
+      <Filter>Resource Manager\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Material.cpp">
+      <Filter>Resource Manager\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="MaterialManager.cpp">
+      <Filter>Resource Manager\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Texture.cpp">
+      <Filter>Resource Manager\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="TextureManager.cpp">
+      <Filter>Resource Manager\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="GltfLoader.cpp">
+      <Filter>Resource Manager\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Mesh.cpp">
+      <Filter>Resource Manager\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="MeshManager.cpp">
+      <Filter>Resource Manager\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Primitive.cpp">
+      <Filter>Resource Manager\Source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\GBuffer.hlsl">
@@ -193,5 +247,8 @@
     <FxCompile Include="Shaders\PixelShader.hlsl">
       <Filter>Shader Files\PixelShaders</Filter>
     </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
 </Project>

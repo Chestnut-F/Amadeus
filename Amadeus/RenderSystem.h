@@ -6,15 +6,41 @@ namespace Amadeus
 	class RenderSystem
 	{
 	public:
-		RenderSystem();
+		RenderSystem(SharedPtr<DeviceResources> device, size_t jobs = 0);
 
-		void Submit(ID3D12CommandList* commandList);
+		template<class F, class... Args>
+		auto Execute(F&& f, Args&&... args)
+			->Future<typename std::invoke_result<F, Args...>::type>;
+
+		template<class F, class... Args>
+		auto Submit(F&& f, Args&&... args)
+			->Future<typename std::invoke_result<F, Args...>::type>;
 
 		void Render(SharedPtr<DeviceResources> device);
 
+		void Upload(SharedPtr<DeviceResources> device);
+
 		void Destroy();
 
+		size_t GetJobs() { return mJobs; }
+
 	private:
-		Vector<ID3D12CommandList*> ppCommandLists;
+		ThreadPool mRenderThread;
+		ThreadPool mJobSystem;
+
+		size_t mJobs;
 	};
+
+	template<class F, class ...Args>
+	inline auto RenderSystem::Execute(F&& f, Args && ...args)
+		->Future<typename std::invoke_result<F, Args...>::type>
+	{
+		return mRenderThread.enqueue(std::forward<F>(f), std::forward<Args>(args)...);
+	}
+
+	template<class F, class ...Args>
+	inline auto RenderSystem::Submit(F&& f, Args && ...args) -> Future<typename std::invoke_result<F, Args ...>::type>
+	{
+		return mJobSystem.enqueue(std::forward<F>(f), std::forward<Args>(args)...);
+	}
 }

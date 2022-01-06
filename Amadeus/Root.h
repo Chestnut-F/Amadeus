@@ -5,6 +5,7 @@ namespace Amadeus
 {
 	class StepTimer;
 	class DeviceResources;
+	class DescriptorManager;
 	class DescriptorCache;
 	class FrameGraph;
 	class RenderSystem;
@@ -29,6 +30,9 @@ namespace Amadeus
 		void OnButtonUp();
 
 	private:
+		void Load();
+		void Upload();
+
 		std::wstring mTitle;
 
 		UINT32 mWidth;
@@ -39,6 +43,8 @@ namespace Amadeus
 		HWND mHwnd;
 
 		std::shared_ptr<DeviceResources> mDeviceResources;
+
+		std::shared_ptr<DescriptorManager> mDescriptorManager;
 
 		std::shared_ptr<DescriptorCache> mDescriptorCache;
 

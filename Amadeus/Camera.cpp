@@ -21,7 +21,7 @@ namespace Amadeus
 		XMStoreFloat(&mRadius, XMVector3Length(forward));
 	}
 
-	void Camera::Create(SharedPtr<DeviceResources> device)
+	void Camera::Upload(SharedPtr<DeviceResources> device)
 	{
 		const CD3DX12_HEAP_PROPERTIES uploadHeapProperties = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
 		const CD3DX12_RESOURCE_DESC resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(mCameraConstantBufferSize);

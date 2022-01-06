@@ -8,11 +8,12 @@ namespace Amadeus
 	public:
 		virtual void Setup() = 0;
 
-		virtual void Execute(SharedPtr<DeviceResources> device, SharedPtr<DescriptorCache> descriptorCache, SharedPtr<RenderSystem> renderer) = 0;
+		virtual bool Execute(
+			SharedPtr<DeviceResources> device, SharedPtr<DescriptorManager> descriptorManager, SharedPtr<DescriptorCache> descriptorCache) = 0;
 
 	protected:
 		ComPtr<ID3D12RootSignature> mRootSignature;
 		ComPtr<ID3D12PipelineState> mPipelineState;
-		ComPtr<ID3D12GraphicsCommandList> mCommandList;
+		Vector<ComPtr<ID3D12GraphicsCommandList>> mCommandLists;
 	};
 }

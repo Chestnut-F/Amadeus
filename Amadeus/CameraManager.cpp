@@ -134,8 +134,7 @@ namespace Amadeus
 	{
 	}
 
-	UINT64 CameraManager::Create(SharedPtr<DeviceResources> device, 
-		XMVECTOR position, XMVECTOR lookAtPosition, XMVECTOR upDirection,
+	UINT64 CameraManager::Create( XMVECTOR position, XMVECTOR lookAtPosition, XMVECTOR upDirection,
 		float fov, float aspectRatio, float nearPlane, float farPlane)
 	{
 		Camera* camera = new Camera(position, lookAtPosition, upDirection, fov, aspectRatio, nearPlane, farPlane);
@@ -143,9 +142,17 @@ namespace Amadeus
 		mSize++;
 		assert(mSize == mCameraList.size());
 
-		camera->Create(device);
-
 		return mSize;
+	}
+
+	void CameraManager::Upload(SharedPtr<DeviceResources> device)
+	{
+		assert(mSize == 1);
+
+		for (auto camera : mCameraList)
+		{
+			camera->Upload(device);
+		}
 	}
 
 }

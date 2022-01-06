@@ -26,15 +26,15 @@ namespace Amadeus
 
     inline std::wstring String2WString(std::string& str)
     {
-        int count = static_cast<int>(MultiByteToWideChar(CP_UTF8, 0, str.c_str(), str.length(), NULL, 0));
+        int count = MultiByteToWideChar(CP_UTF8, 0, str.c_str(), static_cast<int>(str.length()), NULL, 0);
         std::wstring wstr(count, 0);
-        MultiByteToWideChar(CP_UTF8, 0, str.c_str(), str.length(), &wstr[0], count);
+        MultiByteToWideChar(CP_UTF8, 0, str.c_str(), static_cast<int>(str.length()), &wstr[0], count);
         return wstr;
     }
 
     inline std::string WString2String(const std::wstring& wstr)
     {
-        int count = static_cast<int>(WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), wstr.length(), NULL, 0, NULL, NULL));
+        int count = WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), static_cast<int>(wstr.length()), NULL, 0, NULL, NULL);
         std::string str(count, 0);
         WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), -1, &str[0], count, NULL, NULL);
         return str;

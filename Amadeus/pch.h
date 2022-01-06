@@ -12,6 +12,7 @@
 #include <thread>
 #include <mutex>
 #include <condition_variable>
+#include <future>
 
 #include <windows.h>
 #include <wrl.h>
@@ -21,8 +22,7 @@
 #include <D3Dcompiler.h>
 #include <DirectXColors.h>
 #include <DirectXMath.h>
-#include <memory>
-#include <vector>
+#include <DirectXTex.h>
 
 #if defined(_DEBUG)
 #include <dxgidebug.h>
@@ -31,5 +31,7 @@
 #include "Common/AmadeusHelper.h"
 #include "Common/StepTimer.h"
 #include "Common/DeviceResources.h"
+#include "Common/RootSignature.h"
 #include "Common/DescriptorManager.h"
 #include "Common/DescriptorCache.h"
+#include "Common/ThreadPool.h"

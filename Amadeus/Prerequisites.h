@@ -21,6 +21,8 @@ namespace Amadeus
 	using Thread = std::thread;
 	using Mutex = std::mutex;
 	using Condition = std::condition_variable;
+	template<typename T> using Future = std::future<T>;
+	template<typename T> using Promise = std::promise<T>;
 	template<typename T> using UniqueLock = std::unique_lock<T>;
 	template<typename T> using LockGuard = std::lock_guard<T>;
 	template<typename T> using Optional = std::optional<T>;

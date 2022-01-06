@@ -90,7 +90,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>AMADEUS_EXPORTS;STBI_MSC_SECURE_CRT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>AMADEUS_CONCURRENCY;AMADEUS_EXPORTS;STBI_MSC_SECURE_CRT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>false</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalIncludeDirectories>$(SolutionDir)Amadeus;$(SolutionDir)third_party;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -111,7 +111,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>AMADEUS_EXPORTS;STBI_MSC_SECURE_CRT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>AMADEUS_CONCURRENCY;AMADEUS_EXPORTS;STBI_MSC_SECURE_CRT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>false</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalIncludeDirectories>$(SolutionDir)Amadeus;$(SolutionDir)third_party;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -132,7 +132,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>AMADEUS_EXPORTS;STBI_MSC_SECURE_CRT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>AMADEUS_CONCURRENCY;AMADEUS_EXPORTS;STBI_MSC_SECURE_CRT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>false</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalIncludeDirectories>$(SolutionDir)Amadeus;$(SolutionDir)third_party;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -153,7 +153,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>AMADEUS_EXPORTS;STBI_MSC_SECURE_CRT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>AMADEUS_CONCURRENCY;AMADEUS_EXPORTS;STBI_MSC_SECURE_CRT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>false</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalIncludeDirectories>$(SolutionDir)Amadeus;$(SolutionDir)third_party;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -199,7 +199,6 @@
       <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(OutDir)Shaders\%(Filename).cso</ObjectFileOutput>
       <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(OutDir)Shaders\%(Filename).cso</ObjectFileOutput>
     </FxCompile>
-    <None Include="packages.config" />
     <FxCompile Include="Shaders\Common.hlsli">
       <FileType>Document</FileType>
       <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(OutDir)Shaders\%(Filename).cso</ObjectFileOutput>
@@ -228,7 +227,9 @@
     <ClInclude Include="Common\DescriptorCache.h" />
     <ClInclude Include="Common\DescriptorManager.h" />
     <ClInclude Include="Common\DeviceResources.h" />
+    <ClInclude Include="Common\RootSignature.h" />
     <ClInclude Include="Common\StepTimer.h" />
+    <ClInclude Include="Common\ThreadPool.h" />
     <ClInclude Include="Common\Work.h" />
     <ClInclude Include="Common\WorkQueue.h" />
     <ClInclude Include="Enums.h" />
@@ -237,16 +238,25 @@
     <ClInclude Include="FrameGraph.h" />
     <ClInclude Include="FrameGraphPass.h" />
     <ClInclude Include="GBufferPass.h" />
+    <ClInclude Include="GltfLoader.h" />
+    <ClInclude Include="Material.h" />
+    <ClInclude Include="MaterialManager.h" />
+    <ClInclude Include="Mesh.h" />
+    <ClInclude Include="MeshManager.h" />
     <ClInclude Include="Observer.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Prerequisites.h" />
+    <ClInclude Include="Primitive.h" />
     <ClInclude Include="Program.h" />
     <ClInclude Include="ProgramManager.h" />
     <ClInclude Include="Registry.h" />
     <ClInclude Include="RenderPassRegistry.h" />
     <ClInclude Include="RenderSystem.h" />
+    <ClInclude Include="ResourceManagers.h" />
     <ClInclude Include="Root.h" />
     <ClInclude Include="Subject.h" />
+    <ClInclude Include="Texture.h" />
+    <ClInclude Include="TextureManager.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
@@ -258,12 +268,20 @@
     <ClCompile Include="FrameGraph.cpp" />
     <ClCompile Include="FrameGraphPass.cpp" />
     <ClCompile Include="GBufferPass.cpp" />
+    <ClCompile Include="GltfLoader.cpp" />
+    <ClCompile Include="Material.cpp" />
+    <ClCompile Include="MaterialManager.cpp" />
+    <ClCompile Include="Mesh.cpp" />
+    <ClCompile Include="MeshManager.cpp" />
     <ClCompile Include="pch.cpp" />
+    <ClCompile Include="Primitive.cpp" />
     <ClCompile Include="Program.cpp" />
     <ClCompile Include="ProgramManager.cpp" />
     <ClCompile Include="RenderPassRegistry.cpp" />
     <ClCompile Include="RenderSystem.cpp" />
     <ClCompile Include="Root.cpp" />
+    <ClCompile Include="Texture.cpp" />
+    <ClCompile Include="TextureManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\GBuffer.hlsl">
@@ -295,14 +313,17 @@
       <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(OutDir)Shaders\%(Filename).cso</ObjectFileOutput>
     </FxCompile>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
-    <Import Project="..\packages\directxtk12_desktop_2017.2021.11.8.1\build\native\directxtk12_desktop_2017.targets" Condition="Exists('..\packages\directxtk12_desktop_2017.2021.11.8.1\build\native\directxtk12_desktop_2017.targets')" />
+    <Import Project="..\packages\directxtex_desktop_win10.2021.11.8.1\build\native\directxtex_desktop_win10.targets" Condition="Exists('..\packages\directxtex_desktop_win10.2021.11.8.1\build\native\directxtex_desktop_win10.targets')" />
   </ImportGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
       <ErrorText>这台计算机上缺少此项目引用的 NuGet 程序包。使用“NuGet 程序包还原”可下载这些程序包。有关更多信息，请参见 http://go.microsoft.com/fwlink/?LinkID=322105。缺少的文件是 {0}。</ErrorText>
     </PropertyGroup>
-    <Error Condition="!Exists('..\packages\directxtk12_desktop_2017.2021.11.8.1\build\native\directxtk12_desktop_2017.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\directxtk12_desktop_2017.2021.11.8.1\build\native\directxtk12_desktop_2017.targets'))" />
+    <Error Condition="!Exists('..\packages\directxtex_desktop_win10.2021.11.8.1\build\native\directxtex_desktop_win10.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\directxtex_desktop_win10.2021.11.8.1\build\native\directxtex_desktop_win10.targets'))" />
   </Target>
 </Project>

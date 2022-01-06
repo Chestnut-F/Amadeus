@@ -21,7 +21,7 @@ namespace Amadeus
 		Camera(XMVECTOR position, XMVECTOR lookAt = { 0.0f, 0.0f, 0.0f }, XMVECTOR up = { 0.0f, 1.0f, 0.0f }, 
 			float fov = XM_PI / 3.0f, float aspectRatio = 16.0f / 9.0f, float nearPlane = 1.0f, float farPlane = 1000.0f);
 
-		void Create(SharedPtr<DeviceResources> device);
+		void Upload(SharedPtr<DeviceResources> device);
 
 		void Update(XMVECTOR position, XMVECTOR lookAt, XMVECTOR up);
 

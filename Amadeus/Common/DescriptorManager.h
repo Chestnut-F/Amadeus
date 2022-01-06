@@ -3,7 +3,8 @@
 namespace Amadeus
 {
 	static const UINT SRV_HEAP_SIZE = 256;
-	static const UINT SAMPLER_HEAP_SIZE = 16;
+	static const UINT SAMPLER_HEAP_SIZE = 1;
+	static const UINT STANDARD_SAMPLER_ROOT_INDEX = 6;
 
 	class DescriptorManager
 	{
@@ -17,6 +18,8 @@ namespace Amadeus
 			std::shared_ptr<DeviceResources> device, const D3D12_SAMPLER_DESC& samplerDesc);
 
 		ID3D12DescriptorHeap* GetSamplerHeap() { return mSamplerHeap.Get(); }
+
+		ID3D12DescriptorHeap* GetSrvHeap() { return mSrvHeap.Get(); }
 
 	private:
 		void CreateSrvHeap(std::shared_ptr<DeviceResources> device);

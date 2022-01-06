@@ -3,8 +3,8 @@
 #include "Common/DeviceResources.h"
 #include "FrameGraph.h"
 #include "RenderSystem.h"
-#include "CameraManager.h"
-#include "ProgramManager.h"
+#include "ResourceManagers.h"
+#include "GltfLoader.h"
 
 namespace Amadeus
 {
@@ -27,10 +27,11 @@ namespace Amadeus
 	void Root::Init()
 	{
 		GetDeviceResources();
-
+		mDescriptorManager.reset(new DescriptorManager(mDeviceResources));
 		mDescriptorCache.reset(new DescriptorCache(mDeviceResources));
 
-		mRenderer.reset(new RenderSystem());
+		size_t jobs = max(std::thread::hardware_concurrency() - 1, 0);
+		mRenderer.reset(new RenderSystem(mDeviceResources, jobs));
 
 		ProgramManager& programManager = ProgramManager::Instance();
 		programManager.Init();
@@ -42,9 +43,8 @@ namespace Amadeus
 		Registry& registry = Registry::instance();
 		registry.regis();
 
-		CameraManager& cameraManager = CameraManager::Instance();
-		cameraManager.Init();
-		cameraManager.Create(mDeviceResources, { 30.0f, 0.0f, 0.0f });
+		Load();
+		Upload();
 	}
 
 	void Root::PreRender()
@@ -56,12 +56,12 @@ namespace Amadeus
 	void Root::Render()
 	{
 		CameraManager::Instance().Render();
-		mFrameGraph->Execute(mDeviceResources, mDescriptorCache, mRenderer);
+		mFrameGraph->Execute(mDeviceResources, mDescriptorManager, mDescriptorCache, mRenderer);
 	}
 
 	void Root::PostRender()
 	{
-		mDescriptorCache->Reset();
+		mDescriptorCache->Reset(mDeviceResources);
 		CameraManager::Instance().PostRender();
 	}
 
@@ -118,6 +118,26 @@ namespace Amadeus
 		{
 			mouseButtonUp->notify(params);
 		}
+	}
+
+	void Root::Load()
+	{
+		CameraManager& cameraManager = CameraManager::Instance();
+		cameraManager.Init();
+		cameraManager.Create({ 20.0f, 20.0f, 20.0f });
+
+		Gltf::LoadGltf(L"Sponza", mDeviceResources, mDescriptorManager);
+
+		TextureManager::Instance().LoadFromFile(TEXTURE_EMPTY_ID, mDeviceResources, mDescriptorManager);
+	}
+
+	void Root::Upload()
+	{
+		CameraManager::Instance().Upload(mDeviceResources);
+
+		TextureManager::Instance().UploadAll(mDeviceResources, mRenderer);
+
+		MeshManager::Instance().UploadAll(mDeviceResources, mRenderer);
 	}
 
 	std::shared_ptr<DeviceResources> Root::GetDeviceResources()

@@ -29,7 +29,6 @@ namespace Amadeus
 		void Destroy();
 
 		UINT64 Create(
-			SharedPtr<DeviceResources> device, 
 			XMVECTOR position, 
 			XMVECTOR lookAtPosition = { 0.0f, 0.0f, 0.0f }, 
 			XMVECTOR upDirection = { 0.0f, 1.0f, 0.0f }, 
@@ -37,6 +36,8 @@ namespace Amadeus
 			float aspectRatio = 16.0f / 9.0f, 
 			float nearPlane = 1.0f, 
 			float farPlane = 1000.0f);
+
+		void Upload(SharedPtr<DeviceResources> device);
 
 		Camera& GetDefaultCamera() { return *mCameraList[DEFAULT_CAMERA]; }
 

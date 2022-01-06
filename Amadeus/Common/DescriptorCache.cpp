@@ -4,18 +4,20 @@
 namespace Amadeus
 {
 	DescriptorCache::DescriptorCache(std::shared_ptr<DeviceResources> device)
-		: mCbvSrvUavCacheOffset(0)
-		, mRtvCacheOffset(0)
+		: mRtvCacheOffset(0)
 		, mDsvCacheOffset(0)
 	{
+		for (UINT i = 0; i < c_frameCount; ++i)
+			mCbvSrvUavCacheOffsets[i] = 0;
+
 		CreateCbvSrvUavCache(device);
 		CreateRtvCache(device);
 		CreateDsvCache(device);
 	}
 
-	void DescriptorCache::Reset()
+	void DescriptorCache::Reset(std::shared_ptr<DeviceResources> device)
 	{
-		ResetCbvSrvUavCache();
+		ResetCbvSrvUavCache(device);
 		ResetRtvCache();
 		ResetDsvCache();
 	}
@@ -23,17 +25,22 @@ namespace Amadeus
 	CD3DX12_GPU_DESCRIPTOR_HANDLE DescriptorCache::AppendSrvCache(
 		std::shared_ptr<DeviceResources> device, const D3D12_CPU_DESCRIPTOR_HANDLE& srcHandle)
 	{
-		assert(mCbvSrvUavCacheOffset + 1 < CBV_SRV_UAV_CACHE_SIZE);
+		UINT curFrameIndex = device->GetCurrentFrameIndex();
+		assert(mCbvSrvUavCacheOffsets[curFrameIndex] + 1 <= CBV_SRV_UAV_CACHE_SIZE);
 
 		CD3DX12_CPU_DESCRIPTOR_HANDLE dstHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(
-			mCbvSrvUavCache->GetCPUDescriptorHandleForHeapStart(), mCbvSrvUavCacheOffset, mCbvSrvUavDescriptorSize);
+			mCbvSrvUavCaches[curFrameIndex]->GetCPUDescriptorHandleForHeapStart(), 
+			mCbvSrvUavCacheOffsets[curFrameIndex], 
+			mCbvSrvUavDescriptorSize);
 
 		device->GetD3DDevice()->CopyDescriptors(1, &dstHandle, nullptr, 1, &srcHandle, nullptr, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 
 		CD3DX12_GPU_DESCRIPTOR_HANDLE gpuHandle = CD3DX12_GPU_DESCRIPTOR_HANDLE(
-			mCbvSrvUavCache->GetGPUDescriptorHandleForHeapStart(), mCbvSrvUavCacheOffset, mCbvSrvUavDescriptorSize);
+			mCbvSrvUavCaches[curFrameIndex]->GetGPUDescriptorHandleForHeapStart(), 
+			mCbvSrvUavCacheOffsets[curFrameIndex], 
+			mCbvSrvUavDescriptorSize);
 
-		++mCbvSrvUavCacheOffset;
+		++mCbvSrvUavCacheOffsets[curFrameIndex];
 
 		return gpuHandle;
 	}
@@ -41,17 +48,22 @@ namespace Amadeus
 	CD3DX12_GPU_DESCRIPTOR_HANDLE DescriptorCache::AppendCbvCache(
 		std::shared_ptr<DeviceResources> device, const D3D12_CONSTANT_BUFFER_VIEW_DESC& cbvDesc)
 	{
-		assert(mCbvSrvUavCacheOffset + 1 < CBV_SRV_UAV_CACHE_SIZE);
+		UINT curFrameIndex = device->GetCurrentFrameIndex();
+		assert(mCbvSrvUavCacheOffsets[curFrameIndex] + 1 <= CBV_SRV_UAV_CACHE_SIZE);
 
 		CD3DX12_CPU_DESCRIPTOR_HANDLE cpuHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(
-			mCbvSrvUavCache->GetCPUDescriptorHandleForHeapStart(), mCbvSrvUavCacheOffset, mCbvSrvUavDescriptorSize);
+			mCbvSrvUavCaches[curFrameIndex]->GetCPUDescriptorHandleForHeapStart(),
+			mCbvSrvUavCacheOffsets[curFrameIndex],
+			mCbvSrvUavDescriptorSize);
 
 		device->GetD3DDevice()->CreateConstantBufferView(&cbvDesc, cpuHandle);
 
 		CD3DX12_GPU_DESCRIPTOR_HANDLE gpuHandle = CD3DX12_GPU_DESCRIPTOR_HANDLE(
-			mCbvSrvUavCache->GetGPUDescriptorHandleForHeapStart(), mCbvSrvUavCacheOffset, mCbvSrvUavDescriptorSize);
+			mCbvSrvUavCaches[curFrameIndex]->GetGPUDescriptorHandleForHeapStart(),
+			mCbvSrvUavCacheOffsets[curFrameIndex],
+			mCbvSrvUavDescriptorSize);
 
-		++mCbvSrvUavCacheOffset;
+		++mCbvSrvUavCacheOffsets[curFrameIndex];
 
 		return gpuHandle;
 	}
@@ -59,7 +71,7 @@ namespace Amadeus
 	CD3DX12_CPU_DESCRIPTOR_HANDLE DescriptorCache::AppendRtvCache(
 		std::shared_ptr<DeviceResources> device, ID3D12Resource* renderTarget, const D3D12_RENDER_TARGET_VIEW_DESC& rtvDesc)
 	{
-		assert(mRtvCacheOffset + 1 < RTV_CACHE_SIZE);
+		assert(mRtvCacheOffset + 1 <= RTV_CACHE_SIZE);
 
 		CD3DX12_CPU_DESCRIPTOR_HANDLE cpuHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(
 			mRtvCache->GetCPUDescriptorHandleForHeapStart(), mRtvCacheOffset, mRtvDescriptorSize);
@@ -74,7 +86,7 @@ namespace Amadeus
 	CD3DX12_CPU_DESCRIPTOR_HANDLE DescriptorCache::AppendDsvCache(
 		std::shared_ptr<DeviceResources> device, ID3D12Resource* depthStencil, const D3D12_DEPTH_STENCIL_VIEW_DESC& dsvDesc)
 	{
-		assert(mDsvCacheOffset + 1 < DSV_CACHE_SIZE);
+		assert(mDsvCacheOffset + 1 <= DSV_CACHE_SIZE);
 
 		CD3DX12_CPU_DESCRIPTOR_HANDLE cpuHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(
 			mDsvCache->GetCPUDescriptorHandleForHeapStart(), mDsvCacheOffset, mDsvDescriptorSize);
@@ -93,11 +105,10 @@ namespace Amadeus
 		cbvSrvUavHeapDesc.NumDescriptors = CBV_SRV_UAV_CACHE_SIZE;
 		cbvSrvUavHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
 		cbvSrvUavHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
-		ThrowIfFailed(device->GetD3DDevice()->CreateDescriptorHeap(&cbvSrvUavHeapDesc, IID_PPV_ARGS(&mCbvSrvUavCache)));
+		for (UINT i = 0; i < c_frameCount; ++i)
+			ThrowIfFailed(device->GetD3DDevice()->CreateDescriptorHeap(&cbvSrvUavHeapDesc, IID_PPV_ARGS(&mCbvSrvUavCaches[i])));
 
 		mCbvSrvUavDescriptorSize = device->GetD3DDevice()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-
-		NAME_D3D12_OBJECT(mCbvSrvUavCache);
 	}
 
 	void DescriptorCache::CreateRtvCache(std::shared_ptr<DeviceResources> device)
@@ -128,9 +139,9 @@ namespace Amadeus
 		NAME_D3D12_OBJECT(mDsvCache);
 	}
 
-	void DescriptorCache::ResetCbvSrvUavCache()
+	void DescriptorCache::ResetCbvSrvUavCache(std::shared_ptr<DeviceResources> device)
 	{
-		mCbvSrvUavCacheOffset = 0;
+		mCbvSrvUavCacheOffsets[device->GetCurrentFrameIndex()] = 0;
 	}
 
 	void DescriptorCache::ResetRtvCache()

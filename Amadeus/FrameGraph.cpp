@@ -20,12 +20,26 @@ namespace Amadeus
 
 	void FrameGraph::Execute(
 		SharedPtr<DeviceResources> device, 
+		SharedPtr<DescriptorManager> descriptorManager,
 		SharedPtr<DescriptorCache> descriptorCache, 
 		SharedPtr<RenderSystem> renderer)
 	{
+		Vector<Future<bool>> results;
+
 		for (auto pass : mPasses)
 		{
-			pass->Execute(device, descriptorCache, renderer);
+#ifdef AMADEUS_CONCURRENCY
+			results.emplace_back(
+				renderer->Execute(&FrameGraphPass::Execute, pass, device, descriptorManager, descriptorCache));
+#else
+			pass->Execute(device, descriptorManager, descriptorCache);
+#endif // AMADEUS_CONCURRENCY
+		}
+
+		for (auto&& res : results)
+		{
+			if (!res.get())
+				throw RuntimeError("FrameGraphPass::Execute Error");
 		}
 
 		renderer->Render(device);
