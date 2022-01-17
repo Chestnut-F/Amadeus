@@ -116,6 +116,11 @@ namespace Amadeus
         mImage.Release();
     }
 
+    void Texture::Destroy()
+    {
+        mTextureResource->Release();
+    }
+
     void Texture::CreateFromFile(WString&& fileName)
     {
         WString fullPath = GetAssetFullPath(L"Assets\\" + fileName);

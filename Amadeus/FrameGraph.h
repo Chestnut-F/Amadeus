@@ -1,18 +1,70 @@
 #pragma once
 #include "Prerequisites.h"
+#include "DependencyGraph.h"
+#include "FrameGraphPass.h"
+#include "FrameGraphResource.h"
 
 namespace Amadeus
 {
+	class FrameGraph;
+	class FrameGraphBuilder;
+	class FrameGraphNode;
+
+	class FrameGraphBuilder
+	{
+	public:
+		FrameGraphNode* DeclarePass(FrameGraph& fg, FrameGraphPass* pass);
+
+		SharedPtr<FrameGraphResource> Write(
+			String&& name, FrameGraphResourceType type, DXGI_FORMAT format, FrameGraph& fg, FrameGraphNode* from);
+
+		void Read(
+			String&& name, FrameGraphResourceType type, DXGI_FORMAT format, FrameGraph& fg, FrameGraphNode* to);
+	};
+
+	class FrameGraphNode
+		: public DependencyGraph::Node
+	{
+	public:
+		FrameGraphNode(FrameGraph& fg, FrameGraphPass* pass);
+
+		void Setup(FrameGraph& fg, FrameGraphBuilder& builder);
+
+		bool Execute(
+			SharedPtr<DeviceResources> device, SharedPtr<DescriptorManager> descriptorManager, SharedPtr<DescriptorCache> descriptorCache);
+
+	private:
+		UniquePtr<FrameGraphPass> mPass;
+	};
+
 	class FrameGraph
 	{
 	public:
-		FrameGraph();
+		explicit FrameGraph();
+		FrameGraph(const FrameGraph&) = delete;
+		FrameGraph& operator=(const FrameGraph&) = delete;
+		~FrameGraph() noexcept;
 
 		void AddPass(const String& passName, SharedPtr<DeviceResources> device);
 
+		void Setup();
+
+		void Compile();
+
 		void Execute(SharedPtr<DeviceResources> device, SharedPtr<DescriptorManager> descriptorManager, SharedPtr<DescriptorCache> descriptorCache, SharedPtr<RenderSystem> renderer);
 
+		//DependencyGraph& GetGraph() { return mGraph; }
+
+		//Vector<SharedPtr<FrameGraphNode>>& GetNodes() { return mPassNodes; }
+
 	private:
-		Vector<FrameGraphPass*> mPasses;
+		friend class FrameGraphBuilder;
+		friend class FrameGraphNode;
+
+		DependencyGraph mGraph;
+
+		FrameGraphBuilder mBuilder;
+		Vector<SharedPtr<FrameGraphNode>> mPassNodes;
+		Map<String, SharedPtr<FrameGraphResource>> mResourcesDict;
 	};
 }

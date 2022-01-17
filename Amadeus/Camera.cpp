@@ -62,6 +62,11 @@ namespace Amadeus
 		memcpy(pCameraCbvDataBegin, &mCameraConstantBuffer, mCameraConstantBufferSize);
 	}
 
+	void Camera::Destroy()
+	{
+		mCameraConstants->Release();
+	}
+
 	XMVECTOR Camera::GetPosition()
 	{
 		return XMLoadFloat3(&mPosition);

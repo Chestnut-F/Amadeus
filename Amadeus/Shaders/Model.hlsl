@@ -2,31 +2,34 @@
 
 struct VSInput
 {
-    float3 position : POSITION0;
-    float3 normal : NORMAL0;
-    float4 tangent : TANGENT0;
-    float2 uv : TEXCOORD0;
+    float3 position : POSITION;
+    float3 normal : NORMAL;
+    float4 tangent : TANGENT;
+    float2 uv : TEXCOORD;
 };
 
 struct VSOutput
 {
     float4 position : SV_POSITION;
-    float3 positionWorld : POSITION0;
-    float3 normal : NORMAL0;
-    float3 tangent : TANGENT0;
-    float2 uv : TEXCOORD0;
+    float3 positionW : POSITION;
+    float3 normal : NORMAL;
+    float3 tangent : TANGENT;
+    float2 uv : TEXCOORD;
 };
 
-cbuffer GlobalConstants : register(b0)
+cbuffer CameraConstants : register(b0)
 {
     float4x4 viewMatrix;
     float4x4 projectionMatrix;
+    float3 cameraPosWorld;
+    float nearPlane;
+    float farPlane;
 };
 
-cbuffer MeshConstants : register(b1)
+cbuffer ModelConstants : register(b2)
 {
     float4x4 modelMatrix;
-}
+};
 
 [RootSignature(Renderer_RootSig)]
 VSOutput main(VSInput input)
@@ -35,12 +38,13 @@ VSOutput main(VSInput input)
 
     float4x4 modelViewMatrix = mul(modelMatrix, viewMatrix);
 
-    float4 posW = mul(float4(input.position, 1.0f), modelViewMatrix);
-    output.positionWorld = posW.xyz;
-    output.position = mul(posW, projectionMatrix);
+    float4 posW = mul(float4(input.position, 1.0f), modelMatrix);
+    float4 posV = mul(posW, viewMatrix);
+    output.positionW = posW.xyz;
+    output.position = mul(posV, projectionMatrix);
 
-    output.normal = mul(input.normal, (float3x3)modelViewMatrix);
-    output.tangent = mul(input.tangent.xyz, (float3x3)modelViewMatrix);
+    output.normal = mul(input.normal, (float3x3)modelMatrix);
+    output.tangent = mul(input.tangent.xyz, (float3x3)modelMatrix);
     output.uv = input.uv;
 
 	return output;

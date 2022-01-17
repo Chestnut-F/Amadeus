@@ -86,6 +86,13 @@ namespace Amadeus
         commandList->DrawIndexedInstanced(mNumIndices, 1, 0, 0, 0);
     }
 
+    void Primitive::Destroy()
+    {
+        mVertexBuffer->Release();
+        mIndexBuffer->Release();
+        mPrimitiveConstants->Release();
+    }
+
     void Primitive::SetMaterial()
     {
         mMaterial = MaterialManager::Instance().GetMaterial(mMaterialId);

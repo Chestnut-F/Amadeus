@@ -4,7 +4,25 @@
 
 namespace Amadeus
 {
-    UINT64 MeshManager::CreateMesh(XMMATRIX modelMatrix)
+	void MeshManager::Init()
+	{
+		listen<StructureRender>("StructureRender",
+			[&](StructureRender params)
+		{
+			params.commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+			MeshManager::Instance().Render(params.device, params.descriptorCache, params.commandList);
+		});
+	}
+
+	void MeshManager::Destroy()
+	{
+		for (auto& mesh : mMeshList)
+		{
+			mesh->Destroy();
+		}
+	}
+
+	UINT64 MeshManager::CreateMesh(XMMATRIX modelMatrix)
 	{
 		UINT64 id = mMeshList.size();
 		Mesh* mesh = new Mesh(modelMatrix);

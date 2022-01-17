@@ -155,6 +155,14 @@ namespace Amadeus
 		}
 	}
 
+	void TextureManager::Destroy()
+	{
+		for (auto& texture : mTextureMap)
+		{
+			texture.second->Destroy();
+		}
+	}
+
 	CD3DX12_CPU_DESCRIPTOR_HANDLE TextureManager::GetDescriptorHandle(WString&& fileName)
 	{
 		auto textureIter = mTextureMap.find(fileName);

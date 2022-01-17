@@ -1,7 +1,4 @@
 #pragma once
-#include "FrameGraphPass.h"
-#include "GBufferPass.h"
-#include "FinalPass.h"
 
 namespace Amadeus
 {

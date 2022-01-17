@@ -18,6 +18,8 @@ namespace Amadeus
 
         void Unload();
 
+        void Destroy();
+
         CD3DX12_CPU_DESCRIPTOR_HANDLE GetDescriptorHandle() { return mHandle; }
 
 	private:

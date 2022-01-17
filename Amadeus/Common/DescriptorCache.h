@@ -3,7 +3,7 @@
 namespace Amadeus
 {
 	static const UINT CBV_SRV_UAV_CACHE_SIZE = 1024;
-	static const UINT RTV_CACHE_SIZE = 1024;
+	static const UINT RTV_CACHE_SIZE = 256;
 	static const UINT DSV_CACHE_SIZE = 2;
 
 	class DescriptorCache

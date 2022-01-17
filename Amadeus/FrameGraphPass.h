@@ -3,13 +3,16 @@
 
 namespace Amadeus
 {
+	class FrameGraph;
+	class FrameGraphBuilder;
+	class FrameGraphNode;
+
 	class FrameGraphPass
 	{
 	public:
-		virtual void Setup() = 0;
+		virtual void Setup(FrameGraph&, FrameGraphBuilder&, FrameGraphNode*) = 0;
 
-		virtual bool Execute(
-			SharedPtr<DeviceResources> device, SharedPtr<DescriptorManager> descriptorManager, SharedPtr<DescriptorCache> descriptorCache) = 0;
+		virtual bool Execute(SharedPtr<DeviceResources>, SharedPtr<DescriptorManager>, SharedPtr<DescriptorCache>) = 0;
 
 	protected:
 		ComPtr<ID3D12RootSignature> mRootSignature;

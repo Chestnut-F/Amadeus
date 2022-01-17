@@ -28,6 +28,8 @@ namespace Amadeus
 
 		void UnloadAll();
 
+		void Destroy();
+
 		CD3DX12_CPU_DESCRIPTOR_HANDLE GetDescriptorHandle(WString&& fileName);
 
 		CD3DX12_CPU_DESCRIPTOR_HANDLE GetDescriptorHandle(UINT64 index);

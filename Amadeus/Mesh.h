@@ -28,6 +28,8 @@ namespace Amadeus
 
 		void Render(SharedPtr<DeviceResources> device, SharedPtr<DescriptorCache> descriptorCache, ID3D12GraphicsCommandList* commandList);
 		
+		void Destroy();
+
 	private:
 		typedef Vector<Primitive*> PrimitiveList;
 		PrimitiveList mPrimitiveList;

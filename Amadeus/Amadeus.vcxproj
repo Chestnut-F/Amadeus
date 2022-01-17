@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -232,11 +232,13 @@
     <ClInclude Include="Common\ThreadPool.h" />
     <ClInclude Include="Common\Work.h" />
     <ClInclude Include="Common\WorkQueue.h" />
+    <ClInclude Include="DependencyGraph.h" />
     <ClInclude Include="Enums.h" />
     <ClInclude Include="Exports.h" />
     <ClInclude Include="FinalPass.h" />
     <ClInclude Include="FrameGraph.h" />
     <ClInclude Include="FrameGraphPass.h" />
+    <ClInclude Include="FrameGraphResource.h" />
     <ClInclude Include="GBufferPass.h" />
     <ClInclude Include="GltfLoader.h" />
     <ClInclude Include="Material.h" />
@@ -264,9 +266,11 @@
     <ClCompile Include="Common\DescriptorCache.cpp" />
     <ClCompile Include="Common\DescriptorManager.cpp" />
     <ClCompile Include="Common\DeviceResources.cpp" />
+    <ClCompile Include="DependencyGraph.cpp" />
     <ClCompile Include="FinalPass.cpp" />
     <ClCompile Include="FrameGraph.cpp" />
     <ClCompile Include="FrameGraphPass.cpp" />
+    <ClCompile Include="FrameGraphResource.cpp" />
     <ClCompile Include="GBufferPass.cpp" />
     <ClCompile Include="GltfLoader.cpp" />
     <ClCompile Include="Material.cpp" />

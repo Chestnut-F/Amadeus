@@ -77,11 +77,19 @@ namespace Amadeus
 	{
 	};
 
+	struct StructureRender
+	{
+		std::shared_ptr<DeviceResources> device;
+		std::shared_ptr<DescriptorCache> descriptorCache;
+		ID3D12GraphicsCommandList* commandList;
+	};
+
 	inline void Registry::regis()
 	{
 		regis<MouseWheel>("MouseWheel");
 		regis<MouseMove>("MouseMove");
 		regis<MouseButtonDown>("MouseButtonDown");
 		regis<MouseButtonUp>("MouseButtonUp");
+		regis<StructureRender>("StructureRender");
 	}
 }

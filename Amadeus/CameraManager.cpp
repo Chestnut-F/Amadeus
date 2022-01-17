@@ -49,6 +49,14 @@ namespace Amadeus
 			input.lButton = false;
 			input.rButton = false;
 		});
+
+		listen<StructureRender>("StructureRender",
+			[&](StructureRender params)
+		{
+			D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc = GetDefaultCamera().GetCbvDesc(params.device);
+			CD3DX12_GPU_DESCRIPTOR_HANDLE cameraConstantsHandle = params.descriptorCache->AppendCbvCache(params.device, cbvDesc);
+			params.commandList->SetGraphicsRootConstantBufferView(COMMON_CAMERA_ROOT_CBV_INDEX, cbvDesc.BufferLocation);
+		});
 	}
 
 	void CameraManager::PreRender(float elapsedSeconds)
@@ -132,6 +140,10 @@ namespace Amadeus
 
 	void CameraManager::Destroy()
 	{
+		for (auto& camera : mCameraList)
+		{
+			camera->Destroy();
+		}
 	}
 
 	UINT64 CameraManager::Create( XMVECTOR position, XMVECTOR lookAtPosition, XMVECTOR upDirection,

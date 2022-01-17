@@ -112,4 +112,12 @@ namespace Amadeus
 			primitive->Render(device, descriptorCache, commandList);
 		}
 	}
+
+	void Mesh::Destroy()
+	{
+		for (auto& primitive : mPrimitiveList)
+		{
+			primitive->Destroy();
+		}
+	}
 }

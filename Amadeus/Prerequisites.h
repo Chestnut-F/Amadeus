@@ -31,8 +31,9 @@ namespace Amadeus
 	using namespace Microsoft::WRL;
 
 	static constexpr UINT FrameCount = 3;
-	static constexpr UINT Width = 3;
-	static constexpr UINT Height = 3;
+	static constexpr UINT64 SCREEN_WIDTH = 1280;
+	static constexpr UINT SCREEN_HEIGHT = 720;
+	static constexpr float BackgroundColor[] = { 0.0f, 0.2f, 0.4f, 1.0f };
 
 	class DeviceResources;
 	class FrameGraph;

@@ -38,6 +38,7 @@ namespace Amadeus
 
 		mFrameGraph.reset(new FrameGraph());
 
+		mFrameGraph->AddPass("GBufferPass", mDeviceResources);
 		mFrameGraph->AddPass("FinalPass", mDeviceResources);
 
 		Registry& registry = Registry::instance();
@@ -56,6 +57,11 @@ namespace Amadeus
 	void Root::Render()
 	{
 		CameraManager::Instance().Render();
+
+		mFrameGraph->Setup();
+
+		//mFrameGraph->Compile();
+
 		mFrameGraph->Execute(mDeviceResources, mDescriptorManager, mDescriptorCache, mRenderer);
 	}
 
@@ -68,6 +74,15 @@ namespace Amadeus
 	void Root::Destroy()
 	{
 		mRenderer->Destroy();
+		mDeviceResources->WaitForGpu();
+
+		MeshManager::Instance().Destroy();
+
+		TextureManager::Instance().Destroy();
+
+		CameraManager::Instance().Destroy();
+
+		mDeviceResources = nullptr;
 	}
 
 	void Root::OnMouseWheel(INT8 zDelta)
@@ -129,6 +144,8 @@ namespace Amadeus
 		Gltf::LoadGltf(L"Sponza", mDeviceResources, mDescriptorManager);
 
 		TextureManager::Instance().LoadFromFile(TEXTURE_EMPTY_ID, mDeviceResources, mDescriptorManager);
+
+		MeshManager::Instance().Init();
 	}
 
 	void Root::Upload()

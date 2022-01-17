@@ -3,6 +3,7 @@
 #include "FinalPass.h"
 #include "RenderSystem.h"
 #include "ResourceManagers.h"
+#include "FrameGraph.h"
 
 namespace Amadeus
 {
@@ -60,9 +61,14 @@ namespace Amadeus
         }
 	}
 
-	void FinalPass::Setup()
-	{
-	}
+    void FinalPass::Setup(FrameGraph& fg, FrameGraphBuilder& builder, FrameGraphNode* node)
+    {
+        builder.Read(
+            "BaseColor",
+            FrameGraphResourceType::RENDER_TARGET,
+            DXGI_FORMAT_R8G8B8A8_UNORM_SRGB,
+            fg, node);
+    }
 
     bool FinalPass::Execute(
         SharedPtr<DeviceResources> device, SharedPtr<DescriptorManager> descriptorManager, SharedPtr<DescriptorCache> descriptorCache)

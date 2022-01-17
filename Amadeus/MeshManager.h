@@ -4,7 +4,7 @@
 
 namespace Amadeus
 {
-	class MeshManager
+	class MeshManager : public Observer
 	{
 	public:
 		MeshManager(const MeshManager&) = delete;
@@ -15,6 +15,10 @@ namespace Amadeus
 			static MeshManager* instance = new MeshManager();
 			return *instance;
 		}
+
+		void Init();
+
+		void Destroy();
 
 		UINT64 Size() { return mMeshList.size(); }
 

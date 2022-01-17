@@ -10,7 +10,7 @@ namespace Amadeus
 	public:
 		FinalPass(SharedPtr<DeviceResources> device);
 
-		void Setup() override;
+		void Setup(FrameGraph&, FrameGraphBuilder&, FrameGraphNode*) override;
 
 		bool Execute(
 			SharedPtr<DeviceResources> device, SharedPtr<DescriptorManager> descriptorManager, SharedPtr<DescriptorCache> descriptorCache) override;

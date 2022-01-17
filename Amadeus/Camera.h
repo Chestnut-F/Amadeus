@@ -25,6 +25,8 @@ namespace Amadeus
 
 		void Update(XMVECTOR position, XMVECTOR lookAt, XMVECTOR up);
 
+		void Destroy();
+
 		XMVECTOR GetPosition();
 		XMVECTOR GetLookAtPosition();
 		XMVECTOR GetLookDirection();

@@ -46,6 +46,8 @@ namespace Amadeus
 
 		void Render(SharedPtr<DeviceResources> device, SharedPtr<DescriptorCache> descriptorCache, ID3D12GraphicsCommandList* commandList);
 
+		void Destroy();
+
 		void SetModelMatrix(XMFLOAT4X4 model) { mPrimitiveConstantBuffer.model = model; }
 
 		void SetMaterial();

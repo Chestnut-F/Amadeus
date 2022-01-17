@@ -27,6 +27,8 @@ namespace Amadeus
 		D3D12_VIEWPORT				GetScreenViewport() const			{ return m_screenViewport; }
 		D3D12_RECT					GetScissorRect() const				{ return m_scissorRect; }
 		UINT						GetCurrentFrameIndex() const		{ return m_currentFrame; }
+		UINT64						GetWindowWidth() const				{ return static_cast<UINT64>(m_width); }
+		UINT						GetWindowHeight() const				{ return m_height; }
 
 		CD3DX12_CPU_DESCRIPTOR_HANDLE GetRenderTargetView() const
 		{
