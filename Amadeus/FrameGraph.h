@@ -18,7 +18,7 @@ namespace Amadeus
 		SharedPtr<FrameGraphResource> Write(
 			String&& name, FrameGraphResourceType type, DXGI_FORMAT format, FrameGraph& fg, FrameGraphNode* from);
 
-		void Read(
+		SharedPtr<FrameGraphResource> Read(
 			String&& name, FrameGraphResourceType type, DXGI_FORMAT format, FrameGraph& fg, FrameGraphNode* to);
 	};
 
@@ -29,6 +29,8 @@ namespace Amadeus
 		FrameGraphNode(FrameGraph& fg, FrameGraphPass* pass);
 
 		void Setup(FrameGraph& fg, FrameGraphBuilder& builder);
+
+		void RegisterResource(SharedPtr<DeviceResources> device, SharedPtr<DescriptorCache> descriptorCache);
 
 		bool Execute(
 			SharedPtr<DeviceResources> device, SharedPtr<DescriptorManager> descriptorManager, SharedPtr<DescriptorCache> descriptorCache);
@@ -49,7 +51,7 @@ namespace Amadeus
 
 		void Setup();
 
-		void Compile();
+		void Compile(SharedPtr<DeviceResources> device, SharedPtr<DescriptorCache> descriptorCache);
 
 		void Execute(SharedPtr<DeviceResources> device, SharedPtr<DescriptorManager> descriptorManager, SharedPtr<DescriptorCache> descriptorCache, SharedPtr<RenderSystem> renderer);
 

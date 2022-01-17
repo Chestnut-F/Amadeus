@@ -8,6 +8,7 @@
 namespace Amadeus
 {
     GBufferPass::GBufferPass(SharedPtr<DeviceResources> device)
+		: FrameGraphPass::FrameGraphPass(false)
     {
 		ProgramManager& shaders = ProgramManager::Instance();
 
@@ -95,6 +96,15 @@ namespace Amadeus
 			FrameGraphResourceType::DEPTH,
 			DXGI_FORMAT_R32_FLOAT,
 			fg, node);
+	}
+
+	void GBufferPass::RegisterResource(SharedPtr<DeviceResources> device, SharedPtr<DescriptorCache> descriptorCache)
+	{
+		mNormal->RegisterResource(device, descriptorCache);
+		mBaseColor->RegisterResource(device, descriptorCache);
+		mMetallicSpecularRoughness->RegisterResource(device, descriptorCache);
+		mVelocity->RegisterResource(device, descriptorCache);
+		mDepth->RegisterResource(device, descriptorCache);
 	}
 
 	bool GBufferPass::Execute(SharedPtr<DeviceResources> device, SharedPtr<DescriptorManager> descriptorManager, SharedPtr<DescriptorCache> descriptorCache)

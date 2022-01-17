@@ -37,6 +37,8 @@ GBuffer main(VSOutput input) : SV_TARGET
 
     output.normal = float4(normalize(input.normal) * 0.5 + 0.5, 1.0);
     output.baseColor = baseColorTexture.Sample(modelSampler, input.uv) * baseColorFactor;
+    output.metallicSpecularRoughness = float4(1.0, 1.0, 1.0, 1.0);
+    output.velocity = float4(1.0, 1.0, 1.0, 1.0);
 
 	return output;
 }

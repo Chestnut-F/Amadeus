@@ -12,9 +12,12 @@ namespace Amadeus
 
 		void Setup(FrameGraph&, FrameGraphBuilder&, FrameGraphNode*) override;
 
+		void RegisterResource(SharedPtr<DeviceResources> device, SharedPtr<DescriptorCache> descriptorCache) override;
+
 		bool Execute(
 			SharedPtr<DeviceResources> device, SharedPtr<DescriptorManager> descriptorManager, SharedPtr<DescriptorCache> descriptorCache) override;
 
 	private:
+		SharedPtr<FrameGraphResource> mBaseColor;
 	};
 }

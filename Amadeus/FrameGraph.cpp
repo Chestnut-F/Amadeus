@@ -22,6 +22,11 @@ namespace Amadeus
 
 		FrameGraphPass* fgPass = pass->try_cast<FrameGraphPass>();
 		FrameGraphNode* passNode = new FrameGraphNode(*this, fgPass);
+		if (fgPass->IsTarget())
+		{
+			passNode->MakeTarget();
+		}
+
 		mPassNodes.emplace_back(passNode);
 	}
 
@@ -33,7 +38,7 @@ namespace Amadeus
 		}
 	}
 
-	void FrameGraph::Compile()
+	void FrameGraph::Compile(SharedPtr<DeviceResources> device, SharedPtr<DescriptorCache> descriptorCache)
 	{
 		mGraph.Cull();
 
@@ -53,14 +58,18 @@ namespace Amadeus
 			for (const auto& edge : reads)
 			{
 				auto pNode = static_cast<FrameGraphNode*>(mGraph.GetNode(edge->from));
+				pNode->RegisterResource(device, descriptorCache);
 			}
 
 			auto const& writes = mGraph.GetOutgoingEdges(passNode.get());
 			for (auto const& edge : writes)
 			{
 				auto pNode = static_cast<FrameGraphNode*>(mGraph.GetNode(edge->to));
+				pNode->RegisterResource(device, descriptorCache);
 			}
 		}
+
+
 	}
 
 	void FrameGraph::Execute(
@@ -71,17 +80,21 @@ namespace Amadeus
 	{
 		Vector<Future<bool>> results;
 
-		for (auto pass : mPassNodes)
+		auto activePassNodesEnd = std::find_if(mPassNodes.begin(), mPassNodes.end(), [](const auto& pPassNode) {
+			return !pPassNode->IsCulled();
+		});
+
+		auto iter = mPassNodes.begin();
+		for (; iter != activePassNodesEnd; ++iter)
 		{
-			if (!pass->IsCulled())
-			{
+			assert(!(*iter)->IsCulled());
+
 #ifdef AMADEUS_CONCURRENCY
-				results.emplace_back(
-					renderer->Execute(&FrameGraphNode::Execute, pass, device, descriptorManager, descriptorCache));
+			results.emplace_back(
+				renderer->Execute(&FrameGraphNode::Execute, iter->get(), device, descriptorManager, descriptorCache));
 #else
-				pass->Execute(device, descriptorManager, descriptorCache);
+			pass->Execute(device, descriptorManager, descriptorCache);
 #endif // AMADEUS_CONCURRENCY
-			}
 		}
 
 		for (auto&& res : results)
@@ -116,7 +129,7 @@ namespace Amadeus
 		return fg.mResourcesDict[name];
 	}
 
-	void FrameGraphBuilder::Read(
+	SharedPtr<FrameGraphResource> FrameGraphBuilder::Read(
 		String&& name, FrameGraphResourceType type, DXGI_FORMAT format, FrameGraph& fg, FrameGraphNode* to)
 	{
 		auto iter = fg.mResourcesDict.find(name);
@@ -135,6 +148,8 @@ namespace Amadeus
 				DependencyGraph::Edge(fg.mGraph, from, to);
 			}
 		}
+
+		return fg.mResourcesDict[name];
 	}
 
 	FrameGraphNode::FrameGraphNode(FrameGraph& fg, FrameGraphPass* pass)
@@ -146,6 +161,11 @@ namespace Amadeus
 	void FrameGraphNode::Setup(FrameGraph& fg, FrameGraphBuilder& builder)
 	{
 		mPass->Setup(fg, builder, this);
+	}
+
+	void FrameGraphNode::RegisterResource(SharedPtr<DeviceResources> device, SharedPtr<DescriptorCache> descriptorCache)
+	{
+		mPass->RegisterResource(device, descriptorCache);
 	}
 
 	bool FrameGraphNode::Execute(

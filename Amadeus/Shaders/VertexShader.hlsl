@@ -1,11 +1,13 @@
 #include "Common.hlsli"
 
-struct VSInput
+static const float2 TexCoords[6] =
 {
-    float3 position : POSITION;
-    float3 normal : NORMAL;
-    float4 tangent : TANGENT;
-    float2 uv : TEXCOORD;
+    float2(0.0f, 1.0f),
+    float2(0.0f, 0.0f),
+    float2(1.0f, 0.0f),
+    float2(0.0f, 1.0f),
+    float2(1.0f, 0.0f),
+    float2(1.0f, 1.0f)
 };
 
 struct VSOutput
@@ -14,29 +16,11 @@ struct VSOutput
     float2 uv : TEXCOORD;
 };
 
-cbuffer CameraConstants : register(b0)
-{
-    float4x4 viewMatrix;
-    float4x4 projectionMatrix;
-    float3 cameraPosWorld;
-    float nearPlane;
-    float farPlane;
-};
-
-cbuffer ModelConstants : register(b2)
-{
-    float4x4 modelMatrix;
-};
-
 [RootSignature(Renderer_RootSig)]
-VSOutput main(VSInput input)
+VSOutput main(uint vertexIndex : SV_VertexID)
 {
     VSOutput output;
-
-    float4 posW = mul(float4(input.position, 1.0f), modelMatrix);
-    float4 posV = mul(posW, viewMatrix);
-    output.position = mul(posV, projectionMatrix);
-    output.uv = input.uv;
-
+    output.uv = TexCoords[vertexIndex];
+    output.position = float4(output.uv.x * 2.0f - 1.0f, 1.0f - output.uv.y * 2.0f, 0.0f, 1.0f);
     return output;
 }

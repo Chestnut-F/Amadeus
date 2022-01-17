@@ -60,7 +60,7 @@ namespace Amadeus
 
 		mFrameGraph->Setup();
 
-		//mFrameGraph->Compile();
+		mFrameGraph->Compile(mDeviceResources, mDescriptorCache);
 
 		mFrameGraph->Execute(mDeviceResources, mDescriptorManager, mDescriptorCache, mRenderer);
 	}

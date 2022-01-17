@@ -8,6 +8,7 @@
 namespace Amadeus
 {
 	FinalPass::FinalPass(SharedPtr<DeviceResources> device)
+        : FrameGraphPass::FrameGraphPass(true)
 	{
         ProgramManager& shaders = ProgramManager::Instance();
 
@@ -18,27 +19,20 @@ namespace Amadeus
             IID_PPV_ARGS(&mRootSignature)
         ));
 
-        D3D12_INPUT_ELEMENT_DESC inputElementDescs[] =
-        {
-            { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
-            { "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
-            { "TANGENT", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 24, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
-            { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 40, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
-        };
-
         D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc = {};
-        psoDesc.InputLayout = { inputElementDescs, _countof(inputElementDescs) };
+        psoDesc.InputLayout = { nullptr, 0 };
         psoDesc.pRootSignature = mRootSignature.Get();
         psoDesc.VS = CD3DX12_SHADER_BYTECODE(shaders.Get("VertexShader.cso"));
         psoDesc.PS = CD3DX12_SHADER_BYTECODE(shaders.Get("PixelShader.cso"));
         psoDesc.RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
         psoDesc.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
-        psoDesc.DepthStencilState = CD3DX12_DEPTH_STENCIL_DESC(D3D12_DEFAULT);
+        psoDesc.DepthStencilState.DepthEnable = FALSE;
+        psoDesc.DepthStencilState.StencilEnable = FALSE;
         psoDesc.SampleMask = UINT_MAX;
         psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
         psoDesc.NumRenderTargets = 1;
         psoDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;
-        psoDesc.DSVFormat = DXGI_FORMAT_D32_FLOAT;
+        psoDesc.DSVFormat = DXGI_FORMAT_UNKNOWN;
         psoDesc.SampleDesc.Count = 1;
         ThrowIfFailed(device->GetD3DDevice()->CreateGraphicsPipelineState(
             &psoDesc, 
@@ -63,11 +57,15 @@ namespace Amadeus
 
     void FinalPass::Setup(FrameGraph& fg, FrameGraphBuilder& builder, FrameGraphNode* node)
     {
-        builder.Read(
+        mBaseColor = builder.Read(
             "BaseColor",
             FrameGraphResourceType::RENDER_TARGET,
             DXGI_FORMAT_R8G8B8A8_UNORM_SRGB,
             fg, node);
+    }
+
+    void FinalPass::RegisterResource(SharedPtr<DeviceResources> device, SharedPtr<DescriptorCache> descriptorCache)
+    {
     }
 
     bool FinalPass::Execute(
@@ -102,15 +100,13 @@ namespace Amadeus
         mCommandLists[curFrameIndex]->ClearRenderTargetView(renderTargetView, clearColor, 0, nullptr);
         mCommandLists[curFrameIndex]->ClearDepthStencilView(depthStencilView, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 
-        Camera& camera = CameraManager::Instance().GetDefaultCamera();
-        D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc = camera.GetCbvDesc(device);
-        CD3DX12_GPU_DESCRIPTOR_HANDLE cameraConstantsHandle = descriptorCache->AppendCbvCache(device, cbvDesc);
-        mCommandLists[curFrameIndex]->SetGraphicsRootConstantBufferView(COMMON_CAMERA_ROOT_CBV_INDEX, cbvDesc.BufferLocation);
+        CD3DX12_GPU_DESCRIPTOR_HANDLE srvHandle = mBaseColor->GetReadView(mCommandLists[curFrameIndex].Get());
+        mCommandLists[curFrameIndex]->SetGraphicsRootDescriptorTable(5, srvHandle);
 
-        mCommandLists[curFrameIndex]->SetGraphicsRootDescriptorTable(COMMON_SAMPLER_ROOT_TABLE_INDEX, descriptorManager->GetSamplerHeap()->GetGPUDescriptorHandleForHeapStart());
-
+        mCommandLists[curFrameIndex]->IASetVertexBuffers(0, 0, nullptr);
+        mCommandLists[curFrameIndex]->IASetIndexBuffer(nullptr);
         mCommandLists[curFrameIndex]->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-        MeshManager::Instance().Render(device, descriptorCache, mCommandLists[curFrameIndex].Get());
+        mCommandLists[curFrameIndex]->DrawInstanced(6, 1, 0, 0);
 
         const CD3DX12_RESOURCE_BARRIER RenderTarget2Present =
             CD3DX12_RESOURCE_BARRIER::Transition(

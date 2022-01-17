@@ -30,7 +30,6 @@ namespace Amadeus
 		{
 			if (bRegistered)
 			{
-				bWritten = false;
 				return;
 			}
 
@@ -87,7 +86,7 @@ namespace Amadeus
 
 		CD3DX12_GPU_DESCRIPTOR_HANDLE GetReadView(ID3D12GraphicsCommandList* commandList)
 		{
-			assert(bWritten);
+			assert(bRegistered);
 
 			const CD3DX12_RESOURCE_BARRIER transition = CD3DX12_RESOURCE_BARRIER::Transition(
 				mResource.Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);

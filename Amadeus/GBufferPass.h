@@ -13,6 +13,8 @@ namespace Amadeus
 
 		void Setup(FrameGraph& fg, FrameGraphBuilder& builder, FrameGraphNode* node) override;
 
+		void RegisterResource(SharedPtr<DeviceResources> device, SharedPtr<DescriptorCache> descriptorCache) override;
+
 		bool Execute(SharedPtr<DeviceResources> device, 
 			SharedPtr<DescriptorManager> descriptorManager, 
 			SharedPtr<DescriptorCache> descriptorCache) override;
