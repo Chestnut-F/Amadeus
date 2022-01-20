@@ -1,6 +1,7 @@
 #pragma once
 #include "Prerequisites.h"
 #include "FrameGraphPass.h"
+#include "FrameGraphResource.h"
 
 namespace Amadeus
 {
@@ -16,6 +17,8 @@ namespace Amadeus
 
 		bool Execute(
 			SharedPtr<DeviceResources> device, SharedPtr<DescriptorManager> descriptorManager, SharedPtr<DescriptorCache> descriptorCache) override;
+
+		void Destroy() override;
 
 	private:
 		SharedPtr<FrameGraphResource> mBaseColor;

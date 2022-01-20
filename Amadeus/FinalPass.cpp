@@ -72,10 +72,7 @@ namespace Amadeus
         SharedPtr<DeviceResources> device, SharedPtr<DescriptorManager> descriptorManager, SharedPtr<DescriptorCache> descriptorCache)
 	{
         UINT curFrameIndex = device->GetCurrentFrameIndex();
-        ThrowIfFailed(device->GetCommandAllocator()->Reset());
-
         ThrowIfFailed(mCommandLists[curFrameIndex]->Reset(device->GetCommandAllocator(), mPipelineState.Get()));
-
         mCommandLists[curFrameIndex]->SetGraphicsRootSignature(mRootSignature.Get());
 
         ID3D12DescriptorHeap* ppHeaps[] = { descriptorCache->GetCbvSrvUavCache(device), descriptorManager->GetSamplerHeap() };
@@ -122,4 +119,9 @@ namespace Amadeus
 
         return true;
 	}
+
+    void FinalPass::Destroy()
+    {
+        FrameGraphPass::Destroy();
+    }
 }

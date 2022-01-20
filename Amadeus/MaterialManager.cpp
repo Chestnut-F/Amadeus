@@ -48,4 +48,13 @@ namespace Amadeus
 		mMaterialList.at(index)
 			->SetDoubleSided(bDouble);
 	}
+
+	void MaterialManager::Destroy()
+	{
+		for (auto& material : mMaterialList)
+		{
+			material->Destroy();
+		}
+		mMaterialList.clear();
+	}
 }

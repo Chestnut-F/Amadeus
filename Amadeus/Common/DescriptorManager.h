@@ -21,6 +21,8 @@ namespace Amadeus
 
 		ID3D12DescriptorHeap* GetSrvHeap() { return mSrvHeap.Get(); }
 
+		void Destroy();
+
 	private:
 		void CreateSrvHeap(std::shared_ptr<DeviceResources> device);
 

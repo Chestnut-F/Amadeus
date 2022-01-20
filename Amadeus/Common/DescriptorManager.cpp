@@ -39,6 +39,10 @@ namespace Amadeus
 		return samplerHandle;
 	}
 
+	void DescriptorManager::Destroy()
+	{
+	}
+
 	void DescriptorManager::CreateSrvHeap(std::shared_ptr<DeviceResources> device)
 	{
 		D3D12_DESCRIPTOR_HEAP_DESC cbvSrvUavHeapDesc = {};

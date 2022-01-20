@@ -94,7 +94,7 @@ namespace Amadeus
 		mDepth = builder.Write(
 			"Depth",
 			FrameGraphResourceType::DEPTH,
-			DXGI_FORMAT_R32_FLOAT,
+			DXGI_FORMAT_D32_FLOAT,
 			fg, node);
 	}
 
@@ -110,12 +110,12 @@ namespace Amadeus
 	bool GBufferPass::Execute(SharedPtr<DeviceResources> device, SharedPtr<DescriptorManager> descriptorManager, SharedPtr<DescriptorCache> descriptorCache)
 	{
 		UINT curFrameIndex = device->GetCurrentFrameIndex();
-		ThrowIfFailed(device->GetCommandAllocator()->Reset());
 		auto& commandList = mCommandLists[curFrameIndex];
-
 		ThrowIfFailed(commandList->Reset(device->GetCommandAllocator(), mPipelineState.Get()));
-
 		commandList->SetGraphicsRootSignature(mRootSignature.Get());
+
+		ID3D12DescriptorHeap* ppHeaps[] = { descriptorCache->GetCbvSrvUavCache(device), descriptorManager->GetSamplerHeap() };
+		mCommandLists[curFrameIndex]->SetDescriptorHeaps(_countof(ppHeaps), ppHeaps);
 
 		const D3D12_VIEWPORT screenViewPort = device->GetScreenViewport();
 		const D3D12_RECT scissorRect = device->GetScissorRect();
@@ -159,5 +159,10 @@ namespace Amadeus
 		device->GetCommandQueue()->ExecuteCommandLists(1, ppCommandList);
 
 		return true;
+	}
+
+	void GBufferPass::Destroy()
+	{
+		FrameGraphPass::Destroy();
 	}
 }

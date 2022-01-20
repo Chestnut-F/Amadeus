@@ -124,6 +124,19 @@ namespace Amadeus
 		{
 			uploadHeap->Release();
 		}
+		uploadHeaps.clear();
+
+		for (auto&& commandAllocator : commandAllocators)
+		{
+			commandAllocator->Release();
+		}
+		commandAllocators.clear();
+
+		for (auto&& commandList : commandLists)
+		{
+			commandList->Release();
+		}
+		commandLists.clear();
 	}
 
 	void TextureManager::Unload(WString&& fileName)
@@ -161,6 +174,7 @@ namespace Amadeus
 		{
 			texture.second->Destroy();
 		}
+		mTextureMap.clear();
 	}
 
 	CD3DX12_CPU_DESCRIPTOR_HANDLE TextureManager::GetDescriptorHandle(WString&& fileName)

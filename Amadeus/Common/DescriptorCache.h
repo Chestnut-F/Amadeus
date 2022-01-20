@@ -19,6 +19,9 @@ namespace Amadeus
 		CD3DX12_GPU_DESCRIPTOR_HANDLE AppendCbvCache(
 			std::shared_ptr<DeviceResources> device, const D3D12_CONSTANT_BUFFER_VIEW_DESC& cbvDesc);
 
+		CD3DX12_GPU_DESCRIPTOR_HANDLE AppendSrvCache(
+			std::shared_ptr<DeviceResources> device, ID3D12Resource* renderTarget, const D3D12_SHADER_RESOURCE_VIEW_DESC& srvDesc);
+
 		CD3DX12_CPU_DESCRIPTOR_HANDLE AppendRtvCache(
 			std::shared_ptr<DeviceResources> device, ID3D12Resource* renderTarget, const D3D12_RENDER_TARGET_VIEW_DESC& rtvDesc);
 
@@ -29,6 +32,8 @@ namespace Amadeus
 		{
 			return mCbvSrvUavCaches[device->GetCurrentFrameIndex()].Get();
 		}
+
+		void Destroy();
 
 	private:
 		void CreateCbvSrvUavCache(std::shared_ptr<DeviceResources> device);
@@ -43,7 +48,7 @@ namespace Amadeus
 
 		void ResetDsvCache();
 
-		Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> mCbvSrvUavCaches[c_frameCount];
+		std::vector<Microsoft::WRL::ComPtr<ID3D12DescriptorHeap>> mCbvSrvUavCaches;
 		UINT mCbvSrvUavDescriptorSize;
 		UINT mCbvSrvUavCacheOffsets[c_frameCount];
 

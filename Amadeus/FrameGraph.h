@@ -35,6 +35,8 @@ namespace Amadeus
 		bool Execute(
 			SharedPtr<DeviceResources> device, SharedPtr<DescriptorManager> descriptorManager, SharedPtr<DescriptorCache> descriptorCache);
 
+		void Destroy();
+
 	private:
 		UniquePtr<FrameGraphPass> mPass;
 	};
@@ -55,9 +57,7 @@ namespace Amadeus
 
 		void Execute(SharedPtr<DeviceResources> device, SharedPtr<DescriptorManager> descriptorManager, SharedPtr<DescriptorCache> descriptorCache, SharedPtr<RenderSystem> renderer);
 
-		//DependencyGraph& GetGraph() { return mGraph; }
-
-		//Vector<SharedPtr<FrameGraphNode>>& GetNodes() { return mPassNodes; }
+		void Destroy();
 
 	private:
 		friend class FrameGraphBuilder;

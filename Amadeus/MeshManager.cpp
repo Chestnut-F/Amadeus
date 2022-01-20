@@ -20,6 +20,7 @@ namespace Amadeus
 		{
 			mesh->Destroy();
 		}
+		mMeshList.clear();
 	}
 
 	UINT64 MeshManager::CreateMesh(XMMATRIX modelMatrix)
@@ -120,6 +121,19 @@ namespace Amadeus
 		{
 			uploadHeap->Release();
 		}
+		uploadHeaps.clear();
+
+		for (auto&& commandAllocator : commandAllocators)
+		{
+			commandAllocator->Release();
+		}
+		commandAllocators.clear();
+
+		for (auto&& commandList : commandLists)
+		{
+			commandList->Release();
+		}
+		commandLists.clear();
 	}
 
 	void MeshManager::Render(

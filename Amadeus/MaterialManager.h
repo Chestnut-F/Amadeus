@@ -30,6 +30,8 @@ namespace Amadeus
 
 		Material* GetMaterial(UINT64 index) { return mMaterialList.at(index); }
 
+		void Destroy();
+
 	private:
 		MaterialManager() {};
 

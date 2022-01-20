@@ -24,76 +24,66 @@ namespace Amadeus
 			mType = mType | MATERIAL_TYPE_EMISSIVE;
 	}
 
-	bool Material::SetPBRMetallicRoughness(Vector<float>&& baseColorFactor, float metallicFactor, float roughnessFactor)
+	void Material::SetPBRMetallicRoughness(Vector<float>&& baseColorFactor, float metallicFactor, float roughnessFactor)
 	{
-		if (mBaseColorId < 0 || mMetallicRoughnessId < 0)
-			return false;
-
 		mBaseColorFactor.swap(baseColorFactor);
 		mMetallicFactor = metallicFactor;
 		mRoughnessFactor = roughnessFactor;
 
-		mBaseColor = TextureManager::Instance().GetTexture(mBaseColorId);
+		if (mType & MATERIAL_TYPE_BASECOLOR)
+		{
+			mBaseColor = TextureManager::Instance().GetTexture(mBaseColorId);
+			bInitialized = bInitialized | MATERIAL_TYPE_BASECOLOR;
+		}
 
-		bInitialized = bInitialized | MATERIAL_TYPE_BASECOLOR;
-		
-		mMetallicRoughness = TextureManager::Instance().GetTexture(mMetallicRoughnessId);
-
-		bInitialized = bInitialized | MATERIAL_TYPE_METALLIC_ROUGHNESS;
+		if (mType & MATERIAL_TYPE_METALLIC_ROUGHNESS)
+		{
+			mMetallicRoughness = TextureManager::Instance().GetTexture(mMetallicRoughnessId);
+			bInitialized = bInitialized | MATERIAL_TYPE_METALLIC_ROUGHNESS;
+		}
 
 		mMaterialConstantBuffer.baseColorFactor = XMFLOAT4(mBaseColorFactor.data());
 		mMaterialConstantBuffer.metallicFactor = mMetallicFactor;
 		mMaterialConstantBuffer.roughnessFactor = mRoughnessFactor;
-
-		return true;
 	}
 
-	bool Material::SetNormal(float normalScale)
+	void Material::SetNormal(float normalScale)
 	{
-		if (mNormalId < 0)
-			return false;
-
 		mNormalScale = normalScale;
 
-		mNormal = TextureManager::Instance().GetTexture(mNormalId);
-
-		bInitialized = bInitialized | MATERIAL_TYPE_NORMAL;
+		if (mType & MATERIAL_TYPE_NORMAL)
+		{
+			mNormal = TextureManager::Instance().GetTexture(mNormalId);
+			bInitialized = bInitialized | MATERIAL_TYPE_NORMAL;
+		}
 
 		mMaterialConstantBuffer.normalScale = mNormalScale;
-
-		return true;
 	}
 
-	bool Material::SetOcclusion(float occlusionStrength)
+	void Material::SetOcclusion(float occlusionStrength)
 	{
-		if (mOcclusionId < 0)
-			return false;
-
 		mOcclusionStrength = occlusionStrength;
 
-		mOcclusion = TextureManager::Instance().GetTexture(mOcclusionId);
-
-		bInitialized = bInitialized | MATERIAL_TYPE_OCCLUSION;
+		if (mType & MATERIAL_TYPE_OCCLUSION)
+		{
+			mOcclusion = TextureManager::Instance().GetTexture(mOcclusionId);
+			bInitialized = bInitialized | MATERIAL_TYPE_OCCLUSION;
+		}
 
 		mMaterialConstantBuffer.occlusionStrength = mOcclusionStrength;
-
-		return true;
 	}
 
-	bool Material::SetEmissive(Vector<float>&& emissiveFactor)
+	void Material::SetEmissive(Vector<float>&& emissiveFactor)
 	{
-		if (mEmissiveId < 0)
-			return false;
-
 		mEmissiveFactor.swap(emissiveFactor);
 
-		mEmissive = TextureManager::Instance().GetTexture(mEmissiveId);
-
-		bInitialized = bInitialized | MATERIAL_TYPE_EMISSIVE;
+		if (mType & MATERIAL_TYPE_EMISSIVE)
+		{
+			mEmissive = TextureManager::Instance().GetTexture(mEmissiveId);
+			bInitialized = bInitialized | MATERIAL_TYPE_EMISSIVE;
+		}
 
 		mMaterialConstantBuffer.emissiveFactor = XMFLOAT3(mEmissiveFactor.data());
-
-		return true;
 	}
 
 	void Material::SetAlphaMode(float alphaCutoff, MATERIAL_ALPHA_MODE alphaMode)
@@ -109,6 +99,9 @@ namespace Amadeus
 
 	bool Material::Upload(SharedPtr<DeviceResources> device)
 	{
+		if (bUploaded)
+			return true;
+
 		mMaterialConstantBuffer.materialType = mType;
 
 		const CD3DX12_HEAP_PROPERTIES heapProperties = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
@@ -130,6 +123,7 @@ namespace Amadeus
 		memcpy(pMaterialCbvDataBegin, &mMaterialConstantBuffer, mMaterialConstantBufferSize);
 		mMaterialConstants->Unmap(0, 0);
 
+		bUploaded = true;
 		return true;
 	}
 
@@ -189,6 +183,11 @@ namespace Amadeus
 		}
 
 		commandList->SetGraphicsRootDescriptorTable(COMMON_MATERIAL_ROOT_TABLE_INDEX, materialHandle);
+	}
+
+	void Material::Destroy()
+	{
+		mMaterialConstants->Release();
 	}
 
 	Optional<Material::BaseColor> Material::GetBaseColor() const

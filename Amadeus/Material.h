@@ -45,14 +45,14 @@ namespace Amadeus
 		Material& operator=(const Material&) = delete;
 		~Material() = default;
 
-		bool SetPBRMetallicRoughness(Vector<float>&& baseColorFactor = { 1.0f ,1.0f, 1.0f, 1.0f },
+		void SetPBRMetallicRoughness(Vector<float>&& baseColorFactor = { 1.0f ,1.0f, 1.0f, 1.0f },
 			float metallicFactor = 1.0f, float roughnessFactor = 1.0f);
 
-		bool SetNormal(float normalScale);
+		void SetNormal(float normalScale);
 
-		bool SetOcclusion(float occlusionStrength);
+		void SetOcclusion(float occlusionStrength);
 
-		bool SetEmissive(Vector<float>&& emissiveFactor);
+		void SetEmissive(Vector<float>&& emissiveFactor);
 
 		void SetAlphaMode(float alphaCutoff, MATERIAL_ALPHA_MODE alphaMode);
 
@@ -61,6 +61,8 @@ namespace Amadeus
 		bool Upload(SharedPtr<DeviceResources> device);
 
 		void Render(SharedPtr<DeviceResources> device, SharedPtr<DescriptorCache> descriptorCache, ID3D12GraphicsCommandList* commandList);
+
+		void Destroy();
 
 		struct BaseColor
 		{
@@ -145,6 +147,7 @@ namespace Amadeus
 
 		// Flag
 		UINT32 bInitialized = 0;
+		UINT32 bUploaded = 0;
 
 		// D3D12 Resource
 		ComPtr<ID3D12Resource> mMaterialConstants;

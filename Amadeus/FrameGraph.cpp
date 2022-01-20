@@ -68,8 +68,6 @@ namespace Amadeus
 				pNode->RegisterResource(device, descriptorCache);
 			}
 		}
-
-
 	}
 
 	void FrameGraph::Execute(
@@ -79,9 +77,10 @@ namespace Amadeus
 		SharedPtr<RenderSystem> renderer)
 	{
 		Vector<Future<bool>> results;
+		ThrowIfFailed(device->GetCommandAllocator()->Reset());
 
 		auto activePassNodesEnd = std::find_if(mPassNodes.begin(), mPassNodes.end(), [](const auto& pPassNode) {
-			return !pPassNode->IsCulled();
+			return pPassNode->IsCulled();
 		});
 
 		auto iter = mPassNodes.begin();
@@ -106,24 +105,24 @@ namespace Amadeus
 		renderer->Render(device);
 	}
 
+	void FrameGraph::Destroy()
+	{
+		mPassNodes.clear();
+
+		for (auto& resource : mResourcesDict)
+		{
+			resource.second->Destroy();
+		}
+		mResourcesDict.clear();
+	}
+
 	SharedPtr<FrameGraphResource> FrameGraphBuilder::Write(
 		String&& name, FrameGraphResourceType type, DXGI_FORMAT format, FrameGraph& fg, FrameGraphNode* from)
 	{
 		auto iter = fg.mResourcesDict.find(name);
 		if (iter == fg.mResourcesDict.end())
 		{
-			fg.mResourcesDict[name] = std::make_shared<FrameGraphResource>(type, format);
-		}
-		else
-		{
-			auto& resource = iter->second;
-			resource->SetFrom(from);
-
-			const auto& nodes = resource->GetTo();
-			for (auto& to : nodes)
-			{
-				resource->Connect(fg.mGraph, from, to);
-			}
+			fg.mResourcesDict[name] = std::make_shared<FrameGraphResource>(type, format, from);
 		}
 
 		return fg.mResourcesDict[name];
@@ -135,18 +134,12 @@ namespace Amadeus
 		auto iter = fg.mResourcesDict.find(name);
 		if (iter == fg.mResourcesDict.end())
 		{
-			fg.mResourcesDict[name] = std::make_shared<FrameGraphResource>(type, format);
+			throw Exception("Need Write Frame Graph Resource Before Read.");
 		}
 		else
 		{
 			auto& resource = iter->second;
-			resource->AddTo(to);
-
-			const auto& from = resource->GetFrom();
-			if (from)
-			{
-				DependencyGraph::Edge(fg.mGraph, from, to);
-			}
+			resource->Connect(fg.mGraph, to);
 		}
 
 		return fg.mResourcesDict[name];
@@ -172,5 +165,10 @@ namespace Amadeus
 		SharedPtr<DeviceResources> device, SharedPtr<DescriptorManager> descriptorManager, SharedPtr<DescriptorCache> descriptorCache)
 	{
 		return mPass->Execute(device, descriptorManager, descriptorCache);
+	}
+
+	void FrameGraphNode::Destroy()
+	{
+		mPass->Destroy();
 	}
 }

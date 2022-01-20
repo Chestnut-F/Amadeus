@@ -75,6 +75,9 @@ namespace Amadeus
 	{
 		mRenderer->Destroy();
 		mDeviceResources->WaitForGpu();
+		mFrameGraph->Destroy();
+
+		MaterialManager::Instance().Destroy();
 
 		MeshManager::Instance().Destroy();
 
@@ -82,7 +85,20 @@ namespace Amadeus
 
 		CameraManager::Instance().Destroy();
 
+		mDescriptorCache->Destroy();
+		mDescriptorManager->Destroy();
+
 		mDeviceResources = nullptr;
+
+#if defined(_DEBUG)
+		{
+			ComPtr<IDXGIDebug1> dxgiDebug;
+			if (SUCCEEDED(DXGIGetDebugInterface1(0, IID_PPV_ARGS(&dxgiDebug))))
+			{
+				dxgiDebug->ReportLiveObjects(DXGI_DEBUG_ALL, DXGI_DEBUG_RLO_ALL);
+			}
+		}
+#endif
 	}
 
 	void Root::OnMouseWheel(INT8 zDelta)

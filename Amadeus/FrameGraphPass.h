@@ -18,6 +18,11 @@ namespace Amadeus
 
 		virtual bool Execute(SharedPtr<DeviceResources>, SharedPtr<DescriptorManager>, SharedPtr<DescriptorCache>) = 0;
 
+		virtual void Destroy()
+		{
+			mCommandLists.clear();
+		}
+
 		bool IsTarget() { return bTarget; }
 
 	protected:

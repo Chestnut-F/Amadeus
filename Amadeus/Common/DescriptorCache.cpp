@@ -68,6 +68,29 @@ namespace Amadeus
 		return gpuHandle;
 	}
 
+	CD3DX12_GPU_DESCRIPTOR_HANDLE DescriptorCache::AppendSrvCache(
+		std::shared_ptr<DeviceResources> device, ID3D12Resource* renderTarget, const D3D12_SHADER_RESOURCE_VIEW_DESC& srvDesc)
+	{
+		UINT curFrameIndex = device->GetCurrentFrameIndex();
+		assert(mCbvSrvUavCacheOffsets[curFrameIndex] + 1 <= CBV_SRV_UAV_CACHE_SIZE);
+
+		CD3DX12_CPU_DESCRIPTOR_HANDLE cpuHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(
+			mCbvSrvUavCaches[curFrameIndex]->GetCPUDescriptorHandleForHeapStart(),
+			mCbvSrvUavCacheOffsets[curFrameIndex],
+			mCbvSrvUavDescriptorSize);
+
+		device->GetD3DDevice()->CreateShaderResourceView(renderTarget, &srvDesc, cpuHandle);
+
+		CD3DX12_GPU_DESCRIPTOR_HANDLE gpuHandle = CD3DX12_GPU_DESCRIPTOR_HANDLE(
+			mCbvSrvUavCaches[curFrameIndex]->GetGPUDescriptorHandleForHeapStart(),
+			mCbvSrvUavCacheOffsets[curFrameIndex],
+			mCbvSrvUavDescriptorSize);
+
+		++mCbvSrvUavCacheOffsets[curFrameIndex];
+
+		return gpuHandle;
+	}
+
 	CD3DX12_CPU_DESCRIPTOR_HANDLE DescriptorCache::AppendRtvCache(
 		std::shared_ptr<DeviceResources> device, ID3D12Resource* renderTarget, const D3D12_RENDER_TARGET_VIEW_DESC& rtvDesc)
 	{
@@ -98,6 +121,11 @@ namespace Amadeus
 		return cpuHandle;
 	}
 
+	void DescriptorCache::Destroy()
+	{
+
+	}
+
 	void DescriptorCache::CreateCbvSrvUavCache(std::shared_ptr<DeviceResources> device)
 	{
 		// Describe and create a cbv srv uav descriptor cache.
@@ -106,7 +134,12 @@ namespace Amadeus
 		cbvSrvUavHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
 		cbvSrvUavHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 		for (UINT i = 0; i < c_frameCount; ++i)
-			ThrowIfFailed(device->GetD3DDevice()->CreateDescriptorHeap(&cbvSrvUavHeapDesc, IID_PPV_ARGS(&mCbvSrvUavCaches[i])));
+		{
+			Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> descriptorHeap = {};
+			ThrowIfFailed(device->GetD3DDevice()->CreateDescriptorHeap(&cbvSrvUavHeapDesc, IID_PPV_ARGS(&descriptorHeap)));
+			mCbvSrvUavCaches.emplace_back(descriptorHeap);
+			NAME_D3D12_OBJECT_INDEXED(mCbvSrvUavCaches, i);
+		}
 
 		mCbvSrvUavDescriptorSize = device->GetD3DDevice()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 	}

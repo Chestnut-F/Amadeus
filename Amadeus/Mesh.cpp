@@ -102,6 +102,19 @@ namespace Amadeus
 		{
 			uploadHeap->Release();
 		}
+		uploadHeaps.clear();
+
+		for (auto&& commandAllocator : commandAllocators)
+		{
+			commandAllocator->Release();
+		}
+		commandAllocators.clear();
+
+		for (auto&& commandList : commandLists)
+		{
+			commandList->Release();
+		}
+		commandLists.clear();
 	}
 
 	void Mesh::Render(
@@ -119,5 +132,6 @@ namespace Amadeus
 		{
 			primitive->Destroy();
 		}
+		mPrimitiveList.clear();
 	}
 }

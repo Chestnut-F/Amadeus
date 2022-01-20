@@ -19,6 +19,8 @@ namespace Amadeus
 			SharedPtr<DescriptorManager> descriptorManager, 
 			SharedPtr<DescriptorCache> descriptorCache) override;
 
+		void Destroy() override;
+
 	private:
 		SharedPtr<FrameGraphResource> mNormal;
 		SharedPtr<FrameGraphResource> mBaseColor;
