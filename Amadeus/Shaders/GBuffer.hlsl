@@ -1,6 +1,6 @@
 #include "Common.hlsli"
 
-cbuffer MaterialConstants : register(b1)
+cbuffer MaterialConstants : register(b2)
 {
     float4 baseColorFactor;
 };

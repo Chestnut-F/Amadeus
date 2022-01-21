@@ -131,6 +131,13 @@ namespace Amadeus
 	{
 		Texture* whiteTexture = TextureManager::Instance().GetTexture(TEXTURE_EMPTY_ID);
 
+		D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc = {};
+		cbvDesc.BufferLocation = mMaterialConstants->GetGPUVirtualAddress();
+		cbvDesc.SizeInBytes = sizeof(MaterialConstantBuffer);
+
+		CD3DX12_GPU_DESCRIPTOR_HANDLE constantHandle = descriptorCache->AppendCbvCache(device, cbvDesc);
+		commandList->SetGraphicsRootConstantBufferView(COMMON_MATERIAL_ROOT_CBV_INDEX, cbvDesc.BufferLocation);
+
 		CD3DX12_GPU_DESCRIPTOR_HANDLE materialHandle = {};
 		if (mType & MATERIAL_TYPE_BASECOLOR
 			&& bInitialized & MATERIAL_TYPE_BASECOLOR)

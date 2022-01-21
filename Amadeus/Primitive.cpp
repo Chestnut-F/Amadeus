@@ -79,7 +79,6 @@ namespace Amadeus
         commandList->IASetIndexBuffer(&mIndexBufferView);
         commandList->IASetVertexBuffers(0, 1, &mVertexBufferView);
         commandList->SetGraphicsRootConstantBufferView(COMMON_PRIMITIVE_ROOT_CBV_INDEX, mPrimitiveConstants->GetGPUVirtualAddress());
-        commandList->SetGraphicsRootConstantBufferView(COMMON_MATERIAL_ROOT_CBV_INDEX, mMaterial->GetD3D12Resource()->GetGPUVirtualAddress());
 
         mMaterial->Render(device, descriptorCache, commandList);
 
