@@ -168,6 +168,12 @@
     <ClInclude Include="FrameGraphResource.h">
       <Filter>Amadeus\Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Light.h">
+      <Filter>Resource Manager\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="LightManager.h">
+      <Filter>Resource Manager\Header</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Root.cpp">
@@ -244,6 +250,12 @@
     </ClCompile>
     <ClCompile Include="FrameGraphResource.cpp">
       <Filter>Amadeus\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Light.cpp">
+      <Filter>Resource Manager\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="LightManager.cpp">
+      <Filter>Resource Manager\Source</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

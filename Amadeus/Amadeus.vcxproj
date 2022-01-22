@@ -241,6 +241,8 @@
     <ClInclude Include="FrameGraphResource.h" />
     <ClInclude Include="GBufferPass.h" />
     <ClInclude Include="GltfLoader.h" />
+    <ClInclude Include="Light.h" />
+    <ClInclude Include="LightManager.h" />
     <ClInclude Include="Material.h" />
     <ClInclude Include="MaterialManager.h" />
     <ClInclude Include="Mesh.h" />
@@ -273,6 +275,8 @@
     <ClCompile Include="FrameGraphResource.cpp" />
     <ClCompile Include="GBufferPass.cpp" />
     <ClCompile Include="GltfLoader.cpp" />
+    <ClCompile Include="Light.cpp" />
+    <ClCompile Include="LightManager.cpp" />
     <ClCompile Include="Material.cpp" />
     <ClCompile Include="MaterialManager.cpp" />
     <ClCompile Include="Mesh.cpp" />
