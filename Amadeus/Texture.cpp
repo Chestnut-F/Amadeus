@@ -123,7 +123,7 @@ namespace Amadeus
 
     void Texture::CreateFromFile(WString&& fileName)
     {
-        WString fullPath = GetAssetFullPath(L"Assets\\" + fileName);
+        WString fullPath = GetAssetFullPath(L"..\\..\\Assets\\" + fileName);
         WString suffix = WString(fileName, fileName.find(L"."));
         std::transform(suffix.begin(), suffix.end(), suffix.begin(), ::towupper);
 
@@ -142,7 +142,7 @@ namespace Amadeus
 
     void Texture::LoadFromFile(WString&& fileName)
     {
-        WString fullPath = GetAssetFullPath(L"Assets\\" + fileName);
+        WString fullPath = GetAssetFullPath(L"..\\..\\Assets\\" + fileName);
         WString suffix = WString(fileName, fileName.find(L"."));
         std::transform(suffix.begin(), suffix.end(), suffix.begin(), ::towupper);
 

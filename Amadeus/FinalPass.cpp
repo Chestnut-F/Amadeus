@@ -68,20 +68,11 @@ namespace Amadeus
     {
     }
 
-    bool FinalPass::Execute(
-        SharedPtr<DeviceResources> device, SharedPtr<DescriptorManager> descriptorManager, SharedPtr<DescriptorCache> descriptorCache)
+    bool FinalPass::Execute(SharedPtr<DeviceResources> device, 
+        SharedPtr<DescriptorManager> descriptorManager, SharedPtr<DescriptorCache> descriptorCache)
 	{
+        FrameGraphPass::Execute(device, descriptorManager, descriptorCache);
         UINT curFrameIndex = device->GetCurrentFrameIndex();
-        ThrowIfFailed(mCommandLists[curFrameIndex]->Reset(device->GetCommandAllocator(), mPipelineState.Get()));
-        mCommandLists[curFrameIndex]->SetGraphicsRootSignature(mRootSignature.Get());
-
-        ID3D12DescriptorHeap* ppHeaps[] = { descriptorCache->GetCbvSrvUavCache(device), descriptorManager->GetSamplerHeap() };
-        mCommandLists[curFrameIndex]->SetDescriptorHeaps(_countof(ppHeaps), ppHeaps);
-
-        const D3D12_VIEWPORT screenViewPort = device->GetScreenViewport();
-        const D3D12_RECT scissorRect = device->GetScissorRect();
-        mCommandLists[curFrameIndex]->RSSetViewports(1, &screenViewPort);
-        mCommandLists[curFrameIndex]->RSSetScissorRects(1, &scissorRect);
 
         const CD3DX12_RESOURCE_BARRIER Present2RenderTarget = 
             CD3DX12_RESOURCE_BARRIER::Transition(

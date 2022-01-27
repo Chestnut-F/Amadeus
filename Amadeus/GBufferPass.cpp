@@ -92,7 +92,13 @@ namespace Amadeus
 			fg, node);
 
 		mDepth = builder.Write(
-			"Depth",
+			"GBufferDepthTest",
+			FrameGraphResourceType::DEPTH,
+			DXGI_FORMAT_D32_FLOAT,
+			fg, node);
+
+		mShadowMap = builder.Read(
+			"ShadowMap",
 			FrameGraphResourceType::DEPTH,
 			DXGI_FORMAT_D32_FLOAT,
 			fg, node);
@@ -107,20 +113,12 @@ namespace Amadeus
 		mDepth->RegisterResource(device, descriptorCache);
 	}
 
-	bool GBufferPass::Execute(SharedPtr<DeviceResources> device, SharedPtr<DescriptorManager> descriptorManager, SharedPtr<DescriptorCache> descriptorCache)
+	bool GBufferPass::Execute(
+		SharedPtr<DeviceResources> device, SharedPtr<DescriptorManager> descriptorManager, SharedPtr<DescriptorCache> descriptorCache)
 	{
+		FrameGraphPass::Execute(device, descriptorManager, descriptorCache);
 		UINT curFrameIndex = device->GetCurrentFrameIndex();
 		auto& commandList = mCommandLists[curFrameIndex];
-		ThrowIfFailed(commandList->Reset(device->GetCommandAllocator(), mPipelineState.Get()));
-		commandList->SetGraphicsRootSignature(mRootSignature.Get());
-
-		ID3D12DescriptorHeap* ppHeaps[] = { descriptorCache->GetCbvSrvUavCache(device), descriptorManager->GetSamplerHeap() };
-		mCommandLists[curFrameIndex]->SetDescriptorHeaps(_countof(ppHeaps), ppHeaps);
-
-		const D3D12_VIEWPORT screenViewPort = device->GetScreenViewport();
-		const D3D12_RECT scissorRect = device->GetScissorRect();
-		commandList->RSSetViewports(1, &screenViewPort);
-		commandList->RSSetScissorRects(1, &scissorRect);
 
 		CD3DX12_CPU_DESCRIPTOR_HANDLE dsvHandle = mDepth->GetWriteView(commandList.Get());
 		CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle[] =
@@ -142,16 +140,19 @@ namespace Amadeus
 		commandList->SetGraphicsRootDescriptorTable(
 			COMMON_SAMPLER_ROOT_TABLE_INDEX, descriptorManager->GetSamplerHeap()->GetGPUDescriptorHandleForHeapStart());
 
-		// Structure Render
-		StructureRender params = {};
+		commandList->SetGraphicsRootDescriptorTable(
+			COMMON_RENDER_TARGET_ROOT_TABLE_INDEX, mShadowMap->GetReadView(commandList.Get()));
+
+		// GBuffer Render
+		GBufferRender params = {};
 		params.device = device;
 		params.descriptorCache = descriptorCache;
 		params.commandList = commandList.Get();
 
-		Subject<StructureRender>* structureRender = Registry::instance().query<StructureRender>("StructureRender");
-		if (structureRender)
+		Subject<GBufferRender>* gBufferRender = Registry::instance().query<GBufferRender>("GBufferRender");
+		if (gBufferRender)
 		{
-			structureRender->notify(params);
+			gBufferRender->notify(params);
 		}
 
 		ThrowIfFailed(mCommandLists[curFrameIndex]->Close());

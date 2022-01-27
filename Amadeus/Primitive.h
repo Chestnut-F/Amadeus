@@ -5,6 +5,16 @@ namespace Amadeus
 {
 	class Material;
 
+	struct Boundary
+	{
+		float xMin = (NumericLimits<float>::max)();
+		float yMin = (NumericLimits<float>::max)();
+		float zMin = (NumericLimits<float>::max)();
+		float xMax = (NumericLimits<float>::min)();
+		float yMax = (NumericLimits<float>::min)();
+		float zMax = (NumericLimits<float>::min)();
+	};
+
 	class Primitive
 	{
 	public:
@@ -44,7 +54,11 @@ namespace Amadeus
 			ID3D12Resource* indicesUploadHeap, 
 			ID3D12GraphicsCommandList* commandList);
 
-		void Render(SharedPtr<DeviceResources> device, SharedPtr<DescriptorCache> descriptorCache, ID3D12GraphicsCommandList* commandList);
+		void RenderShadow(SharedPtr<DeviceResources> device, 
+			SharedPtr<DescriptorCache> descriptorCache, ID3D12GraphicsCommandList* commandList);
+
+		void Render(SharedPtr<DeviceResources> device, 
+			SharedPtr<DescriptorCache> descriptorCache, ID3D12GraphicsCommandList* commandList);
 
 		void Destroy();
 
@@ -68,6 +82,8 @@ namespace Amadeus
 
 		D3D12_CONSTANT_BUFFER_VIEW_DESC GetCbvDesc(SharedPtr<DeviceResources> device);
 
+		const Boundary& GetBoundary() { return mBoundary; }
+
 	private:
 		typedef D3D12_PRIMITIVE_TOPOLOGY PrimitiveMode;
 		PrimitiveMode mMode;
@@ -89,6 +105,10 @@ namespace Amadeus
 		const UINT mPrimitiveConstantBufferSize = sizeof(PrimitiveConstantBuffer);
 
 		UINT mNumIndices;
+
+		Boundary mBoundary;
+
+		void StatBoundary();
 
 		void ComputeTriangleNormals();
 

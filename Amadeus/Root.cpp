@@ -38,6 +38,7 @@ namespace Amadeus
 
 		mFrameGraph.reset(new FrameGraph());
 
+		mFrameGraph->AddPass("ShadowPass", mDeviceResources);
 		mFrameGraph->AddPass("GBufferPass", mDeviceResources);
 		mFrameGraph->AddPass("FinalPass", mDeviceResources);
 
@@ -52,11 +53,13 @@ namespace Amadeus
 	{
 		mStepTimer->Tick([]() {});
 		CameraManager::Instance().PreRender(mStepTimer->GetElapsedSeconds());
+		LightManager::Instance().PreRender(mStepTimer->GetElapsedSeconds());
 	}
 
 	void Root::Render()
 	{
 		CameraManager::Instance().Render();
+		LightManager::Instance().Render();
 
 		mFrameGraph->Setup();
 
@@ -69,6 +72,7 @@ namespace Amadeus
 	{
 		mDescriptorCache->Reset(mDeviceResources);
 		CameraManager::Instance().PostRender();
+		LightManager::Instance().PostRender();
 	}
 
 	void Root::Destroy()
@@ -82,6 +86,8 @@ namespace Amadeus
 		MeshManager::Instance().Destroy();
 
 		TextureManager::Instance().Destroy();
+
+		LightManager::Instance().Destroy();
 
 		CameraManager::Instance().Destroy();
 
@@ -155,18 +161,28 @@ namespace Amadeus
 	{
 		CameraManager& cameraManager = CameraManager::Instance();
 		cameraManager.Init();
-		cameraManager.Create({ 20.0f, 20.0f, 20.0f });
+
+		LightManager& lightMananger = LightManager::Instance();
+		lightMananger.Init();
 
 		Gltf::LoadGltf(L"Sponza", mDeviceResources, mDescriptorManager);
 
 		TextureManager::Instance().LoadFromFile(TEXTURE_EMPTY_ID, mDeviceResources, mDescriptorManager);
 
-		MeshManager::Instance().Init();
+		MeshManager& meshManager = MeshManager::Instance();
+		meshManager.Init();
+		auto& boundary = meshManager.GetBoundary();
+		XMVECTOR centralLocation = meshManager.GetCentralLocation();
+
+		cameraManager.Create({ boundary.xMax * 2.f, boundary.yMax * 2.f, boundary.zMax * 2.f }, centralLocation);
+		lightMananger.Create({ boundary.xMax * 1.0f, abs(boundary.yMax) * 2.f, boundary.zMin * 1.f }, centralLocation);
 	}
 
 	void Root::Upload()
 	{
 		CameraManager::Instance().Upload(mDeviceResources);
+
+		LightManager::Instance().Upload(mDeviceResources);
 
 		TextureManager::Instance().UploadAll(mDeviceResources, mRenderer);
 

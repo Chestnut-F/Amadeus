@@ -27,5 +27,7 @@ namespace Amadeus
 		SharedPtr<FrameGraphResource> mMetallicSpecularRoughness;
 		SharedPtr<FrameGraphResource> mVelocity;
 		SharedPtr<FrameGraphResource> mDepth;
+
+		SharedPtr<FrameGraphResource> mShadowMap;
 	};
 }

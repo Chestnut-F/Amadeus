@@ -3,17 +3,32 @@
 
 namespace Amadeus
 {
+	enum class LightType
+	{
+		SUN,
+		POINT,
+		SPOT,
+	};
+
 	class Light
 	{
 	public:
 		struct LightConstantBuffer
 		{
-			float padding[64];
+			XMFLOAT4X4 view;
+			XMFLOAT4X4 projection;
+			XMFLOAT3 position;
+			XMFLOAT3 direction;
+			XMFLOAT3 color;
+			float intensity;
+			float nearPlane;
+			float farPlane;
+			float padding[20];
 		};
 		static_assert((sizeof(LightConstantBuffer) % 256) == 0, "Constant Buffer size must be 256-byte aligned");
 
 	public:
-		Light();
+		explicit Light(XMVECTOR pos, XMVECTOR at, XMVECTOR color = { 1.0f, 1.0f, 1.0f }, float intensity = 100000.0f);
 
 		void Upload(SharedPtr<DeviceResources> device);
 
@@ -23,9 +38,16 @@ namespace Amadeus
 
 		void Destroy();
 
+		XMMATRIX GetViewMatrix();
+
+		XMMATRIX GetProjectionMatrix();
+
 		D3D12_CONSTANT_BUFFER_VIEW_DESC GetCbvDesc(SharedPtr<DeviceResources> device);
 
 	private:
+		friend class LightManager;
+
+		LightType mType = LightType::SUN;
 		XMFLOAT3 mPosition;
 		XMFLOAT3 mDirection;
 		XMFLOAT3 mColor;
@@ -38,5 +60,10 @@ namespace Amadeus
 		const UINT mLightConstantBufferSize = sizeof(LightConstantBuffer);
 
 		bool bCastShadows;
+
+		static const float mWidth;
+		static const float mHeight;
+		static const float mNearPlane;
+		static const float mFarPlane;
 	};
 }

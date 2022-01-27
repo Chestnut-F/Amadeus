@@ -50,8 +50,8 @@ namespace Amadeus
 			input.rButton = false;
 		});
 
-		listen<StructureRender>("StructureRender",
-			[&](StructureRender params)
+		listen<GBufferRender>("GBufferRender",
+			[&](GBufferRender params)
 		{
 			D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc = GetDefaultCamera().GetCbvDesc(params.device);
 			CD3DX12_GPU_DESCRIPTOR_HANDLE cameraConstantsHandle = params.descriptorCache->AppendCbvCache(params.device, cbvDesc);
@@ -149,12 +149,13 @@ namespace Amadeus
 	UINT64 CameraManager::Create( XMVECTOR position, XMVECTOR lookAtPosition, XMVECTOR upDirection,
 		float fov, float aspectRatio, float nearPlane, float farPlane)
 	{
+		UINT64 res = mSize;
 		Camera* camera = new Camera(position, lookAtPosition, upDirection, fov, aspectRatio, nearPlane, farPlane);
 		mCameraList.emplace_back(camera);
 		mSize++;
 		assert(mSize == mCameraList.size());
 
-		return mSize;
+		return res;
 	}
 
 	void CameraManager::Upload(SharedPtr<DeviceResources> device)

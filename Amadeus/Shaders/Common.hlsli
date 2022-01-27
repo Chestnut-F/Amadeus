@@ -12,7 +12,7 @@
         "addressU = TEXTURE_ADDRESS_CLAMP," \
         "addressV = TEXTURE_ADDRESS_CLAMP," \
         "addressW = TEXTURE_ADDRESS_CLAMP," \
-        "comparisonFunc = COMPARISON_GREATER_EQUAL," \
+        "comparisonFunc = COMPARISON_LESS_EQUAL," \
         "filter = FILTER_MIN_MAG_LINEAR_MIP_POINT)," \
     "StaticSampler(s3, maxAnisotropy = 8, visibility = SHADER_VISIBILITY_PIXEL)"
 

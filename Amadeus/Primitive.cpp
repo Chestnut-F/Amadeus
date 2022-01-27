@@ -33,6 +33,8 @@ namespace Amadeus
         XMStoreFloat4x4(&mPrimitiveConstantBuffer.model, modelMatrix);
         if (mMaterialId > -1)
             SetMaterial();
+
+        StatBoundary();
     }
 
     bool Primitive::Upload(
@@ -74,7 +76,18 @@ namespace Amadeus
         return true;
     }
 
-    void Primitive::Render(SharedPtr<DeviceResources> device, SharedPtr<DescriptorCache> descriptorCache, ID3D12GraphicsCommandList* commandList)
+    void Primitive::RenderShadow(
+        SharedPtr<DeviceResources> device, SharedPtr<DescriptorCache> descriptorCache, ID3D12GraphicsCommandList* commandList)
+    {
+        commandList->IASetIndexBuffer(&mIndexBufferView);
+        commandList->IASetVertexBuffers(0, 1, &mVertexBufferView);
+        commandList->SetGraphicsRootConstantBufferView(COMMON_PRIMITIVE_ROOT_CBV_INDEX, mPrimitiveConstants->GetGPUVirtualAddress());
+
+        commandList->DrawIndexedInstanced(mNumIndices, 1, 0, 0, 0);
+    }
+
+    void Primitive::Render(
+        SharedPtr<DeviceResources> device, SharedPtr<DescriptorCache> descriptorCache, ID3D12GraphicsCommandList* commandList)
     {
         commandList->IASetIndexBuffer(&mIndexBufferView);
         commandList->IASetVertexBuffers(0, 1, &mVertexBufferView);
@@ -108,6 +121,36 @@ namespace Amadeus
         cbvDesc.BufferLocation = mPrimitiveConstants->GetGPUVirtualAddress();
         cbvDesc.SizeInBytes = mPrimitiveConstantBufferSize;
         return std::move(cbvDesc);
+    }
+
+    void Primitive::StatBoundary()
+    {
+        XMFLOAT3 maximum = { mBoundary.xMax, mBoundary.yMax, mBoundary.zMax };
+        XMFLOAT3 minimum = { mBoundary.xMin ,mBoundary.yMin, mBoundary.zMin };
+
+        for (auto& vertex : mVertices)
+        {
+            auto& x = vertex.position.x;
+            auto& y = vertex.position.y;
+            auto& z = vertex.position.z;
+            minimum.x = x < minimum.x ? x : minimum.x;
+            minimum.y = y < minimum.y ? y : minimum.y;
+            minimum.z = z < minimum.z ? z : minimum.z;
+            maximum.x = x > maximum.x ? x : maximum.x;
+            maximum.y = y > maximum.y ? y : maximum.y;
+            maximum.z = z > maximum.z ? z : maximum.z;
+        }
+
+        XMMATRIX modelMatrix = XMLoadFloat4x4(&mPrimitiveConstantBuffer.model);
+        XMStoreFloat3(&maximum, XMVector3Transform(XMLoadFloat3(&maximum), modelMatrix));
+        XMStoreFloat3(&minimum, XMVector3Transform(XMLoadFloat3(&minimum), modelMatrix));
+
+        mBoundary.xMin = minimum.x;
+        mBoundary.yMin = minimum.y;
+        mBoundary.zMin = minimum.z;
+        mBoundary.xMax = maximum.x;
+        mBoundary.yMax = maximum.y;
+        mBoundary.zMax = maximum.z;
     }
 
     void Primitive::ComputeTriangleNormals()

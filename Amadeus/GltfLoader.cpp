@@ -640,7 +640,7 @@ namespace Amadeus
 		String err;
 		String warn;
 
-		String fullPath = WString2String(GetAssetFullPath(L"Assets\\Models\\" + fileName + L"\\" + fileName + L".gltf"));
+		String fullPath = WString2String(GetAssetFullPath(L"..\\..\\Assets\\Models\\" + fileName + L"\\" + fileName + L".gltf"));
 		bool ret = loader.LoadASCIIFromFile(&model, &err, &warn, fullPath);
 
 		if (!err.empty()) {

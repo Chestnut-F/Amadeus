@@ -26,16 +26,29 @@ namespace Amadeus
 
 		void UploadAll(SharedPtr<DeviceResources> device, SharedPtr<RenderSystem> renderer);
 
-		void Render(SharedPtr<DeviceResources> device, SharedPtr<DescriptorCache> descriptorCache, ID3D12GraphicsCommandList* commandList);
+		void RenderShadow(SharedPtr<DeviceResources> device, 
+			SharedPtr<DescriptorCache> descriptorCache, ID3D12GraphicsCommandList* commandList);
+
+		void Render(SharedPtr<DeviceResources> device, 
+			SharedPtr<DescriptorCache> descriptorCache, ID3D12GraphicsCommandList* commandList);
 
 		Mesh* GetMesh(UINT64 index) { return mMeshList.at(index); }
 
 		const Vector<Mesh*>& GetMeshList() { return mMeshList; }
 
+		const Boundary& GetBoundary();
+
+		XMVECTOR GetCentralLocation();
+
 	private:
-		MeshManager() {}
+		MeshManager() : bBoundaryInitiated(false) {}
 
 		typedef Vector<Mesh*> MeshList;
 		MeshList mMeshList;
+
+		bool bBoundaryInitiated;
+		Boundary mBoundary;
+
+		void StatBoundary(Mesh* mesh);
 	};
 }

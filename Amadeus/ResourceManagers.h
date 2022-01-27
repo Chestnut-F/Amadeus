@@ -5,9 +5,8 @@
 #include "MaterialManager.h"
 #include "CameraManager.h"
 #include "MeshManager.h"
+#include "LightManager.h"
 
 namespace Amadeus
 {
-	static constexpr UINT PRIMITIVE_ROOT_CBV_INDEX = 2;
-	static constexpr UINT MATERIAL_ROOT_CBV_INDEX = 3;
 }

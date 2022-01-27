@@ -174,6 +174,9 @@
     <ClInclude Include="LightManager.h">
       <Filter>Resource Manager\Header</Filter>
     </ClInclude>
+    <ClInclude Include="ShadowPass.h">
+      <Filter>Render Pass\Header</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Root.cpp">
@@ -257,6 +260,9 @@
     <ClCompile Include="LightManager.cpp">
       <Filter>Resource Manager\Source</Filter>
     </ClCompile>
+    <ClCompile Include="ShadowPass.cpp">
+      <Filter>Render Pass\Source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\GBuffer.hlsl">
@@ -268,11 +274,17 @@
     <FxCompile Include="Shaders\Common.hlsli">
       <Filter>Shader Files\Common</Filter>
     </FxCompile>
-    <FxCompile Include="Shaders\VertexShader.hlsl">
-      <Filter>Shader Files\VertexShaders</Filter>
-    </FxCompile>
     <FxCompile Include="Shaders\PixelShader.hlsl">
       <Filter>Shader Files\PixelShaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\ShadowMapPS.hlsl">
+      <Filter>Shader Files\PixelShaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\ShadowMapVS.hlsl">
+      <Filter>Shader Files\VertexShaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\VertexShader.hlsl">
+      <Filter>Shader Files\VertexShaders</Filter>
     </FxCompile>
   </ItemGroup>
   <ItemGroup>

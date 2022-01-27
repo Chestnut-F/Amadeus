@@ -6,12 +6,20 @@ namespace Amadeus
 {
 	void MeshManager::Init()
 	{
-		listen<StructureRender>("StructureRender",
-			[&](StructureRender params)
-		{
-			params.commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-			MeshManager::Instance().Render(params.device, params.descriptorCache, params.commandList);
-		});
+		listen<ShadowMapRender>("ShadowMapRender",
+			[&](ShadowMapRender params)
+			{
+				params.commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST); 
+				MeshManager::Instance().RenderShadow(params.device, params.descriptorCache, params.commandList);
+			});
+			
+
+		listen<GBufferRender>("GBufferRender",
+			[&](GBufferRender params)
+			{
+				params.commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+				MeshManager::Instance().Render(params.device, params.descriptorCache, params.commandList);
+			});
 	}
 
 	void MeshManager::Destroy()
@@ -136,6 +144,15 @@ namespace Amadeus
 		commandLists.clear();
 	}
 
+	void MeshManager::RenderShadow(
+		SharedPtr<DeviceResources> device, SharedPtr<DescriptorCache> descriptorCache, ID3D12GraphicsCommandList* commandList)
+	{
+		for (auto& mesh : mMeshList)
+		{
+			mesh->RenderShadow(device, descriptorCache, commandList);
+		}
+	}
+
 	void MeshManager::Render(
 		SharedPtr<DeviceResources> device, SharedPtr<DescriptorCache> descriptorCache, ID3D12GraphicsCommandList* commandList)
 	{
@@ -143,5 +160,42 @@ namespace Amadeus
 		{
 			mesh->Render(device, descriptorCache, commandList);
 		}
+	}
+
+	const Boundary& MeshManager::GetBoundary()
+	{
+		if (bBoundaryInitiated)
+			return mBoundary;
+
+		for (auto& mesh : mMeshList)
+		{
+			StatBoundary(mesh);
+		}
+		bBoundaryInitiated = true;
+
+		return mBoundary;
+	}
+
+	XMVECTOR MeshManager::GetCentralLocation()
+	{
+		if (!bBoundaryInitiated)
+			return { 0.0f, 0.0f, 0.0f };
+
+		XMFLOAT3 center = {};
+		center.x = (mBoundary.xMin + mBoundary.xMax) / 2.0f;
+		center.y = (mBoundary.yMin + mBoundary.yMax) / 2.0f;
+		center.z = (mBoundary.zMin + mBoundary.zMax) / 2.0f;
+		return std::move(XMLoadFloat3(&center));
+	}
+
+	void MeshManager::StatBoundary(Mesh* mesh)
+	{
+		const auto& boundary = mesh->GetBoundary();
+		mBoundary.xMin = boundary.xMin < mBoundary.xMin ? boundary.xMin : mBoundary.xMin;
+		mBoundary.yMin = boundary.yMin < mBoundary.yMin ? boundary.yMin : mBoundary.yMin;
+		mBoundary.zMin = boundary.zMin < mBoundary.zMin ? boundary.zMin : mBoundary.zMin;
+		mBoundary.xMax = boundary.xMax > mBoundary.xMax ? boundary.xMax : mBoundary.xMax;
+		mBoundary.yMax = boundary.yMax > mBoundary.yMax ? boundary.yMax : mBoundary.yMax;
+		mBoundary.zMax = boundary.zMax > mBoundary.zMax ? boundary.zMax : mBoundary.zMax;
 	}
 }

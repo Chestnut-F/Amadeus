@@ -10,7 +10,7 @@ namespace Amadeus
 	public:
 		explicit Mesh(XMMATRIX modelMatrix)
 		{
-			XMStoreFloat4x4(&mModelMatrix, modelMatrix);
+			XMStoreFloat4x4(&mModelMatrix, XMMatrixTranspose(modelMatrix));
 		}
 
 		~Mesh() = default;
@@ -26,14 +26,24 @@ namespace Amadeus
 
 		void UploadAll(SharedPtr<DeviceResources> device, SharedPtr<RenderSystem> renderer);
 
-		void Render(SharedPtr<DeviceResources> device, SharedPtr<DescriptorCache> descriptorCache, ID3D12GraphicsCommandList* commandList);
+		void RenderShadow(SharedPtr<DeviceResources> device, 
+			SharedPtr<DescriptorCache> descriptorCache, ID3D12GraphicsCommandList* commandList);
+
+		void Render(SharedPtr<DeviceResources> device, 
+			SharedPtr<DescriptorCache> descriptorCache, ID3D12GraphicsCommandList* commandList);
 		
 		void Destroy();
+
+		const Boundary& GetBoundary() { return mBoundary; }
 
 	private:
 		typedef Vector<Primitive*> PrimitiveList;
 		PrimitiveList mPrimitiveList;
 
 		XMFLOAT4X4 mModelMatrix;
+
+		Boundary mBoundary;
+
+		void StatBoundary(Primitive* primitive);
 	};
 }

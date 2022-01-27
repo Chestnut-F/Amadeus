@@ -77,7 +77,14 @@ namespace Amadeus
 	{
 	};
 
-	struct StructureRender
+	struct GBufferRender
+	{
+		std::shared_ptr<DeviceResources> device;
+		std::shared_ptr<DescriptorCache> descriptorCache;
+		ID3D12GraphicsCommandList* commandList;
+	};
+
+	struct ShadowMapRender
 	{
 		std::shared_ptr<DeviceResources> device;
 		std::shared_ptr<DescriptorCache> descriptorCache;
@@ -90,6 +97,7 @@ namespace Amadeus
 		regis<MouseMove>("MouseMove");
 		regis<MouseButtonDown>("MouseButtonDown");
 		regis<MouseButtonUp>("MouseButtonUp");
-		regis<StructureRender>("StructureRender");
+		regis<GBufferRender>("GBufferRender");
+		regis<ShadowMapRender>("ShadowMapRender");
 	}
 }

@@ -116,13 +116,18 @@ namespace Amadeus
 		mResourcesDict.clear();
 	}
 
+	FrameGraphNode* FrameGraphBuilder::DeclarePass(FrameGraph& fg, FrameGraphPass* pass)
+	{
+		return nullptr;
+	}
+
 	SharedPtr<FrameGraphResource> FrameGraphBuilder::Write(
 		String&& name, FrameGraphResourceType type, DXGI_FORMAT format, FrameGraph& fg, FrameGraphNode* from)
 	{
 		auto iter = fg.mResourcesDict.find(name);
 		if (iter == fg.mResourcesDict.end())
 		{
-			fg.mResourcesDict[name] = std::make_shared<FrameGraphResource>(type, format, from);
+			fg.mResourcesDict[name] = std::make_shared<FrameGraphResource>(name, type, format, from);
 		}
 
 		return fg.mResourcesDict[name];

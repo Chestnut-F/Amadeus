@@ -17,6 +17,7 @@ namespace Amadeus
 			mode);
 
 		mPrimitiveList.emplace_back(primitive);
+		StatBoundary(primitive);
 		return id;
 	}
 
@@ -117,6 +118,15 @@ namespace Amadeus
 		commandLists.clear();
 	}
 
+	void Mesh::RenderShadow(
+		SharedPtr<DeviceResources> device, SharedPtr<DescriptorCache> descriptorCache, ID3D12GraphicsCommandList* commandList)
+	{
+		for (auto& primitive : mPrimitiveList)
+		{
+			primitive->RenderShadow(device, descriptorCache, commandList);
+		}
+	}
+
 	void Mesh::Render(
 		SharedPtr<DeviceResources> device, SharedPtr<DescriptorCache> descriptorCache, ID3D12GraphicsCommandList* commandList)
 	{
@@ -133,5 +143,16 @@ namespace Amadeus
 			primitive->Destroy();
 		}
 		mPrimitiveList.clear();
+	}
+
+	void Mesh::StatBoundary(Primitive* primitive)
+	{
+		const auto& boundary = primitive->GetBoundary();
+		mBoundary.xMin = boundary.xMin < mBoundary.xMin ? boundary.xMin : mBoundary.xMin;
+		mBoundary.yMin = boundary.yMin < mBoundary.yMin ? boundary.yMin : mBoundary.yMin;
+		mBoundary.zMin = boundary.zMin < mBoundary.zMin ? boundary.zMin : mBoundary.zMin;
+		mBoundary.xMax = boundary.xMax > mBoundary.xMax ? boundary.xMax : mBoundary.xMax;
+		mBoundary.yMax = boundary.yMax > mBoundary.yMax ? boundary.yMax : mBoundary.yMax;
+		mBoundary.zMax = boundary.zMax > mBoundary.zMax ? boundary.zMax : mBoundary.zMax;
 	}
 }

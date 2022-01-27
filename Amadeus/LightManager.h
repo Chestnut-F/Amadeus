@@ -5,6 +5,7 @@
 namespace Amadeus
 {
 	static constexpr int DEFAULT_LIGHT = 0;
+	static constexpr int SUN_LIGHT = 0;
 
 	class LightManager : public Observer
 	{
@@ -24,12 +25,20 @@ namespace Amadeus
 		void PostRender();
 		void Destroy();
 
-		UINT64 Create();
+		UINT64 Create(XMVECTOR pos, XMVECTOR at, XMVECTOR color = { 1.0f, 1.0f, 1.0f }, float intensity = 100000.0f);
 
-		Light& GetDefaultCamera() { return *mLightList[DEFAULT_LIGHT]; }
+		void Upload(SharedPtr<DeviceResources> device);
+
+		Light& GetDefaultLight() { return *mLightList[DEFAULT_LIGHT]; }
+
+		Light& GetSunLight() { return *mLightList[SUN_LIGHT]; }
+
+		float GetNearPlane() { return mLightList[SUN_LIGHT]->mNearPlane; }
+
+		float GetFarPlane() { return mLightList[SUN_LIGHT]->mFarPlane; }
 
 	public:
-		LightManager() {}
+		LightManager() : mSize(0) {}
 
 		typedef Vector<Light*> LightList;
 		LightList mLightList;
