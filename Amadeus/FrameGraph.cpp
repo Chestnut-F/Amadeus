@@ -30,6 +30,67 @@ namespace Amadeus
 		mPassNodes.emplace_back(passNode);
 	}
 
+	void FrameGraph::PreCompute(SharedPtr<DeviceResources> device, SharedPtr<RenderSystem> renderer)
+	{
+		Vector<ID3D12Resource*> uploadHeaps;
+		Vector<ID3D12GraphicsCommandList*> commandLists;
+		Vector<ID3D12CommandAllocator*> commandAllocators;
+
+		Vector<Future<bool>> results;
+		for (auto& pass : mPassNodes)
+		{
+			ID3D12CommandAllocator* commandAllocator = {};
+
+			ThrowIfFailed(device->GetD3DDevice()->CreateCommandAllocator(
+				D3D12_COMMAND_LIST_TYPE_DIRECT,
+				IID_PPV_ARGS(&commandAllocator)));
+
+			ID3D12GraphicsCommandList* commandList = {};
+
+			ThrowIfFailed(device->GetD3DDevice()->CreateCommandList(
+				0,
+				D3D12_COMMAND_LIST_TYPE_DIRECT,
+				commandAllocator,
+				nullptr,
+				IID_PPV_ARGS(&commandList)));
+
+			commandAllocators.emplace_back(commandAllocator);
+			commandLists.emplace_back(commandList);
+
+#ifdef AMADEUS_CONCURRENCY
+			results.emplace_back(
+				renderer->Execute(&FrameGraphNode::PreCompute, pass.get(), device, commandList));
+#else
+			pass->PreCompute(device, uploadHeap, commandList);
+#endif // AMADEUS_CONCURRENCY
+		}
+
+		for (auto&& res : results)
+		{
+			if (!res.get())
+				throw RuntimeError("FrameGraphPass::PreCompute Error");
+		}
+
+		renderer->Upload(device);
+
+		for (auto& pass : mPassNodes)
+		{
+			pass->PostPreCompute();
+		}
+
+		for (auto&& commandAllocator : commandAllocators)
+		{
+			commandAllocator->Release();
+		}
+		commandAllocators.clear();
+
+		for (auto&& commandList : commandLists)
+		{
+			commandList->Release();
+		}
+		commandLists.clear();
+	}
+
 	void FrameGraph::Setup()
 	{
 		for (auto& node : mPassNodes)
@@ -107,6 +168,10 @@ namespace Amadeus
 
 	void FrameGraph::Destroy()
 	{
+		for (auto& pass : mPassNodes)
+		{
+			pass->Destroy();
+		}
 		mPassNodes.clear();
 
 		for (auto& resource : mResourcesDict)
@@ -154,6 +219,17 @@ namespace Amadeus
 		: DependencyGraph::Node(fg.mGraph)
 	{
 		mPass.reset(pass);
+	}
+
+	bool FrameGraphNode::PreCompute(
+		SharedPtr<DeviceResources> device, ID3D12GraphicsCommandList* commandList)
+	{
+		return mPass->PreCompute(device, commandList);
+	}
+
+	void FrameGraphNode::PostPreCompute()
+	{
+		mPass->PostPreCompute();
 	}
 
 	void FrameGraphNode::Setup(FrameGraph& fg, FrameGraphBuilder& builder)

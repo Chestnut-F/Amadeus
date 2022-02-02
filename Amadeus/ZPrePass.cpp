@@ -1,11 +1,11 @@
 #include "pch.h"
-#include "ShadowPass.h"
+#include "ZPrePass.h"
 #include "ResourceManagers.h"
 #include "FrameGraph.h"
 
 namespace Amadeus
 {
-	ShadowPass::ShadowPass(SharedPtr<DeviceResources> device)
+	ZPrePass::ZPrePass(SharedPtr<DeviceResources> device)
 		: FrameGraphPass::FrameGraphPass(false)
 	{
 		ProgramManager& shaders = ProgramManager::Instance();
@@ -28,17 +28,17 @@ namespace Amadeus
 		D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc = {};
 		psoDesc.InputLayout = { inputElementDescs, _countof(inputElementDescs) };
 		psoDesc.pRootSignature = mRootSignature.Get();
-		psoDesc.VS = CD3DX12_SHADER_BYTECODE(shaders.Get("ShadowMapVS.cso"));
-		psoDesc.PS = CD3DX12_SHADER_BYTECODE(shaders.Get("ShadowMapPS.cso"));
+		psoDesc.VS = CD3DX12_SHADER_BYTECODE(shaders.Get("ZPreVS.cso"));
+		psoDesc.PS = CD3DX12_SHADER_BYTECODE(shaders.Get("ZPrePS.cso"));
 		psoDesc.RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
-		psoDesc.RasterizerState.CullMode = D3D12_CULL_MODE_FRONT;
-		psoDesc.RasterizerState.SlopeScaledDepthBias = -1.5f;
-		psoDesc.RasterizerState.DepthBias = -100;
 		psoDesc.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
 		psoDesc.DepthStencilState = CD3DX12_DEPTH_STENCIL_DESC(D3D12_DEFAULT);
+		psoDesc.DepthStencilState.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
 		psoDesc.SampleMask = UINT_MAX;
 		psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
-		psoDesc.NumRenderTargets = 0;
+		psoDesc.NumRenderTargets = 2;
+		psoDesc.RTVFormats[0] = DXGI_FORMAT_R32G32B32A32_FLOAT;
+		psoDesc.RTVFormats[1] = DXGI_FORMAT_R11G11B10_FLOAT;
 		psoDesc.DSVFormat = DXGI_FORMAT_D32_FLOAT;
 		psoDesc.SampleDesc.Count = 1;
 		ThrowIfFailed(device->GetD3DDevice()->CreateGraphicsPipelineState(
@@ -62,60 +62,72 @@ namespace Amadeus
 		}
 	}
 
-	bool ShadowPass::PreCompute(SharedPtr<DeviceResources> device, ID3D12GraphicsCommandList* commandList)
+	bool ZPrePass::PreCompute(SharedPtr<DeviceResources> device, ID3D12GraphicsCommandList* commandList)
 	{
 		return true;
 	}
 
-	void ShadowPass::PostPreCompute()
+	void ZPrePass::PostPreCompute()
 	{
 	}
 
-	void ShadowPass::Setup(FrameGraph& fg, FrameGraphBuilder& builder, FrameGraphNode* node)
+	void ZPrePass::Setup(FrameGraph& fg, FrameGraphBuilder& builder, FrameGraphNode* node)
 	{
-		mShadowMap = builder.Write(
-			"ShadowMap",
+		mPosition = builder.Write(
+			"ZPrePosition",
+			FrameGraphResourceType::RENDER_TARGET,
+			DXGI_FORMAT_R32G32B32A32_FLOAT,
+			fg, node);
+
+		mNormal = builder.Write(
+			"ZPreNormal",
+			FrameGraphResourceType::RENDER_TARGET,
+			DXGI_FORMAT_R11G11B10_FLOAT,
+			fg, node);
+
+		mDepth = builder.Write(
+			"ZPreDepth",
 			FrameGraphResourceType::DEPTH,
 			DXGI_FORMAT_D32_FLOAT,
 			fg, node);
 	}
 
-	void ShadowPass::RegisterResource(SharedPtr<DeviceResources> device, SharedPtr<DescriptorCache> descriptorCache)
+	void ZPrePass::RegisterResource(SharedPtr<DeviceResources> device, SharedPtr<DescriptorCache> descriptorCache)
 	{
-		mShadowMap->RegisterResource(device, descriptorCache, mWidth, mHeight);
+		mPosition->RegisterResource(device, descriptorCache);
+		mNormal->RegisterResource(device, descriptorCache);
+		mDepth->RegisterResource(device, descriptorCache);
 	}
 
-	bool ShadowPass::Execute(SharedPtr<DeviceResources> device, 
-		SharedPtr<DescriptorManager> descriptorManager, SharedPtr<DescriptorCache> descriptorCache)
+	bool ZPrePass::Execute(SharedPtr<DeviceResources> device, SharedPtr<DescriptorManager> descriptorManager, SharedPtr<DescriptorCache> descriptorCache)
 	{
+		FrameGraphPass::Execute(device, descriptorManager, descriptorCache);
 		UINT curFrameIndex = device->GetCurrentFrameIndex();
 		auto& commandList = mCommandLists[curFrameIndex];
-		ThrowIfFailed(commandList->Reset(device->GetCommandAllocator(), mPipelineState.Get()));
-		commandList->SetGraphicsRootSignature(mRootSignature.Get());
 
-		ID3D12DescriptorHeap* ppHeaps[] = { descriptorCache->GetCbvSrvUavCache(device), descriptorManager->GetSamplerHeap() };
-		mCommandLists[curFrameIndex]->SetDescriptorHeaps(_countof(ppHeaps), ppHeaps);
+		CD3DX12_CPU_DESCRIPTOR_HANDLE dsvHandle = mDepth->GetWriteView(commandList.Get());
+		CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle[] =
+		{
+			mPosition->GetWriteView(commandList.Get()),
+			mNormal->GetWriteView(commandList.Get()),
+		};
 
-		const D3D12_VIEWPORT screenViewPort = { 0.0f, 0.0f, static_cast<FLOAT>(mWidth), static_cast<FLOAT>(mHeight), 0.0f, 1.0f };
-		const D3D12_RECT scissorRect = { 0, 0, static_cast<LONG>(mWidth), static_cast<LONG>(mHeight) };
-		commandList->RSSetViewports(1, &screenViewPort);
-		commandList->RSSetScissorRects(1, &scissorRect);
-
-		CD3DX12_CPU_DESCRIPTOR_HANDLE dsvHandle = mShadowMap->GetWriteView(commandList.Get());
+		commandList->ClearRenderTargetView(rtvHandle[0], BackgroundColor, 0, nullptr);
+		commandList->ClearRenderTargetView(rtvHandle[1], BackgroundColor, 0, nullptr);
 		commandList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 
-		commandList->OMSetRenderTargets(0, nullptr, FALSE, &dsvHandle);
+		commandList->OMSetRenderTargets(2, &rtvHandle[0], FALSE, &dsvHandle);
 
-		// Shadow Map Render
-		ShadowMapRender params = {};
+		// Z Pre Render
+		ZPreRender params = {};
 		params.device = device;
 		params.descriptorCache = descriptorCache;
 		params.commandList = commandList.Get();
 
-		Subject<ShadowMapRender>* shadowMapRender = Registry::instance().query<ShadowMapRender>("ShadowMapRender");
-		if (shadowMapRender)
+		Subject<ZPreRender>* zPreRender = Registry::instance().query<ZPreRender>("ZPreRender");
+		if (zPreRender)
 		{
-			shadowMapRender->notify(params);
+			zPreRender->notify(params);
 		}
 
 		ThrowIfFailed(mCommandLists[curFrameIndex]->Close());
@@ -125,9 +137,8 @@ namespace Amadeus
 		return true;
 	}
 
-	void ShadowPass::Destroy()
+	void ZPrePass::Destroy()
 	{
 		FrameGraphPass::Destroy();
 	}
-
 }

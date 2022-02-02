@@ -4,12 +4,27 @@
 #include "RenderPassRegistry.h"
 #include "FrameGraphPass.h"
 #include "ShadowPass.h"
+#include "ZPrePass.h"
+#include "SSAOPass.h"
+#include "SSAOBlurPass.h"
 #include "GBufferPass.h"
 #include "FinalPass.h"
 
 namespace Amadeus
 {
 	auto ShadowPassFactory = meta::reflect<ShadowPass>(MetaRenderPassHash("ShadowPass"))
+		.base<FrameGraphPass>()
+		.ctor<std::shared_ptr<DeviceResources>>();
+
+	auto ZPrePassFactory = meta::reflect<ZPrePass>(MetaRenderPassHash("ZPrePass"))
+		.base<FrameGraphPass>()
+		.ctor<std::shared_ptr<DeviceResources>>();
+
+	auto SSAOPassFactory = meta::reflect<SSAOPass>(MetaRenderPassHash("SSAOPass"))
+		.base<FrameGraphPass>()
+		.ctor<std::shared_ptr<DeviceResources>>();
+
+	auto SSAOBlurPassFactory = meta::reflect<SSAOBlurPass>(MetaRenderPassHash("SSAOBlurPass"))
 		.base<FrameGraphPass>()
 		.ctor<std::shared_ptr<DeviceResources>>();
 

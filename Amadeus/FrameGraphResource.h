@@ -28,6 +28,8 @@ namespace Amadeus
 
 		CD3DX12_GPU_DESCRIPTOR_HANDLE GetReadView(ID3D12GraphicsCommandList* commandList);
 
+		CD3DX12_CPU_DESCRIPTOR_HANDLE GetDepthStencilView(ID3D12GraphicsCommandList* commandList);
+
 		CD3DX12_CPU_DESCRIPTOR_HANDLE AppendWriteView(
 			SharedPtr<DeviceResources> device, SharedPtr<DescriptorCache> cache);
 
@@ -64,6 +66,7 @@ namespace Amadeus
 		bool bRegistered;
 		bool bWritten;
 		bool bRead;
+		bool bEarlyZ;
 
 		DependencyGraph::Node* mFrom;
 		Vector<DependencyGraph::Node*> mTo;

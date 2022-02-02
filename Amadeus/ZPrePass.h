@@ -5,11 +5,11 @@
 
 namespace Amadeus
 {
-	class ShadowPass
+	class ZPrePass
 		: public FrameGraphPass
 	{
 	public:
-		ShadowPass(SharedPtr<DeviceResources> device);
+		ZPrePass(SharedPtr<DeviceResources> device);
 
 		bool PreCompute(SharedPtr<DeviceResources> device, ID3D12GraphicsCommandList* commandList) override;
 
@@ -26,9 +26,9 @@ namespace Amadeus
 		void Destroy() override;
 
 	private:
-		SharedPtr<FrameGraphResource> mShadowMap;
+		SharedPtr<FrameGraphResource> mPosition;
+		SharedPtr<FrameGraphResource> mNormal;
 
-		const UINT64 mWidth = 2048;
-		const UINT mHeight = 2048;
+		SharedPtr<FrameGraphResource> mDepth;
 	};
 }

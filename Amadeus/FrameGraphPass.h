@@ -10,7 +10,11 @@ namespace Amadeus
 	class FrameGraphPass
 	{
 	public:
-		FrameGraphPass(bool target) : bTarget(target) {}
+		FrameGraphPass(bool target) : bTarget(target), bUploaded(false) {}
+
+		virtual bool PreCompute(SharedPtr<DeviceResources> device, ID3D12GraphicsCommandList* commandList);
+
+		virtual void PostPreCompute();
 
 		virtual void Setup(FrameGraph&, FrameGraphBuilder&, FrameGraphNode*) = 0;
 
@@ -32,5 +36,6 @@ namespace Amadeus
 		Vector<ComPtr<ID3D12GraphicsCommandList>> mCommandLists;
 
 		bool bTarget;
+		bool bUploaded;
 	};
 }

@@ -10,6 +10,7 @@ namespace Amadeus
 		, mFormat(format)
 		, bRegistered(false)
 		, bWritten(false)
+		, bEarlyZ(false)
 		, mFrom(from)
 	{
 
@@ -84,9 +85,18 @@ namespace Amadeus
 				break;
 			case FrameGraphResourceType::DEPTH:
 			case FrameGraphResourceType::STENCIL:
-				transition = CD3DX12_RESOURCE_BARRIER::Transition(
-					mResource.Get(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_DEPTH_WRITE);
-				commandList->ResourceBarrier(1, &transition);
+				if (bEarlyZ)
+				{
+					transition = CD3DX12_RESOURCE_BARRIER::Transition(
+						mResource.Get(), D3D12_RESOURCE_STATE_DEPTH_READ, D3D12_RESOURCE_STATE_DEPTH_WRITE);
+					commandList->ResourceBarrier(1, &transition);
+				}
+				else
+				{
+					transition = CD3DX12_RESOURCE_BARRIER::Transition(
+						mResource.Get(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_DEPTH_WRITE);
+					commandList->ResourceBarrier(1, &transition);
+				}
 				break;
 			default:
 				throw Exception("Invaild View Type.");
@@ -94,13 +104,14 @@ namespace Amadeus
 		}
 
 		bRead = false;
+		bEarlyZ = false;
 
 		return mWriteHandle;
 	}
 
 	CD3DX12_GPU_DESCRIPTOR_HANDLE FrameGraphResource::GetReadView(ID3D12GraphicsCommandList* commandList)
 	{
-		assert(bRegistered);
+		assert(bRegistered && !bEarlyZ);
 		CD3DX12_RESOURCE_BARRIER transition;
 
 		switch (mType)
@@ -123,6 +134,29 @@ namespace Amadeus
 		bRead = true;
 
 		return mReadHandle;
+	}
+
+	CD3DX12_CPU_DESCRIPTOR_HANDLE FrameGraphResource::GetDepthStencilView(ID3D12GraphicsCommandList* commandList)
+	{
+		assert(bRegistered);
+		CD3DX12_RESOURCE_BARRIER transition;
+
+		switch (mType)
+		{
+		case FrameGraphResourceType::DEPTH:
+		case FrameGraphResourceType::STENCIL:
+			transition = CD3DX12_RESOURCE_BARRIER::Transition(
+				mResource.Get(), D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_STATE_DEPTH_READ);
+			commandList->ResourceBarrier(1, &transition);
+			break;
+		default:
+			throw Exception("Invaild View Type.");
+		}
+
+		bRead = true;
+		bEarlyZ = true;
+
+		return mWriteHandle;
 	}
 
 	CD3DX12_CPU_DESCRIPTOR_HANDLE FrameGraphResource::AppendWriteView(SharedPtr<DeviceResources> device, SharedPtr<DescriptorCache> cache)

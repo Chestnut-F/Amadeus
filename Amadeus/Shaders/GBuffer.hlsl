@@ -14,6 +14,7 @@ Texture2D<float4> emissiveTexture           : register(t3);
 Texture2D<float4> normalTexture             : register(t4);
 
 Texture2D<float>  shadowMap                 : register(t5);
+Texture2D<float>  ssaoTexture               : register(t6);
 
 struct VSOutput
 {
@@ -59,6 +60,14 @@ float GetDirectionalShadow(float4 ShadowCoord)
     return result * result;
 }
 
+float GetAO(float4 position)
+{
+    uint2 pixelPos = uint2(position.xy);
+    float ao = ssaoTexture[pixelPos];
+    return ao;
+}
+
+[earlydepthstencil]
 [RootSignature(Renderer_RootSig)]
 GBuffer main(VSOutput input) : SV_TARGET
 {
@@ -67,7 +76,9 @@ GBuffer main(VSOutput input) : SV_TARGET
     output.normal = float4(normalize(input.normal) * 0.5 + 0.5, 1.0);
 
     float shadow = GetDirectionalShadow(input.shadowCoord);
-    output.baseColor = mul(shadow, baseColorTexture.Sample(modelSampler, input.uv) * baseColorFactor);
+    float occlusion = GetAO(input.position);
+
+    output.baseColor = occlusion * shadow * baseColorTexture.Sample(modelSampler, input.uv) * baseColorFactor;
     output.metallicSpecularRoughness = float4(1.0, 1.0, 1.0, 1.0);
     output.velocity = float4(1.0, 1.0, 1.0, 1.0);
 

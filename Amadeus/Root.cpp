@@ -39,6 +39,9 @@ namespace Amadeus
 		mFrameGraph.reset(new FrameGraph());
 
 		mFrameGraph->AddPass("ShadowPass", mDeviceResources);
+		mFrameGraph->AddPass("ZPrePass", mDeviceResources);
+		mFrameGraph->AddPass("SSAOPass", mDeviceResources);
+		mFrameGraph->AddPass("SSAOBlurPass", mDeviceResources);
 		mFrameGraph->AddPass("GBufferPass", mDeviceResources);
 		mFrameGraph->AddPass("FinalPass", mDeviceResources);
 
@@ -47,6 +50,8 @@ namespace Amadeus
 
 		Load();
 		Upload();
+
+		mFrameGraph->PreCompute(mDeviceResources, mRenderer);
 	}
 
 	void Root::PreRender()

@@ -3,7 +3,16 @@
 
 namespace Amadeus
 {
-    bool FrameGraphPass::Execute(SharedPtr<DeviceResources> device, 
+	bool FrameGraphPass::PreCompute(SharedPtr<DeviceResources> device, ID3D12GraphicsCommandList* commandList)
+	{
+		return true;
+	}
+
+	void FrameGraphPass::PostPreCompute()
+	{
+	}
+
+	bool FrameGraphPass::Execute(SharedPtr<DeviceResources> device,
 		SharedPtr<DescriptorManager> descriptorManager, SharedPtr<DescriptorCache> descriptorCache)
     {
 		UINT curFrameIndex = device->GetCurrentFrameIndex();

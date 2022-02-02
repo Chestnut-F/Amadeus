@@ -11,6 +11,10 @@ namespace Amadeus
 	public:
 		FinalPass(SharedPtr<DeviceResources> device);
 
+		bool PreCompute(SharedPtr<DeviceResources> device, ID3D12GraphicsCommandList* commandList) override;
+
+		void PostPreCompute() override;
+
 		void Setup(FrameGraph&, FrameGraphBuilder&, FrameGraphNode*) override;
 
 		void RegisterResource(SharedPtr<DeviceResources> device, SharedPtr<DescriptorCache> descriptorCache) override;

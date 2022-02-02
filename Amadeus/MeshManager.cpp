@@ -12,7 +12,13 @@ namespace Amadeus
 				params.commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST); 
 				MeshManager::Instance().RenderShadow(params.device, params.descriptorCache, params.commandList);
 			});
-			
+
+		listen<ZPreRender>("ZPreRender",
+			[&](ZPreRender params)
+			{
+				params.commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+				MeshManager::Instance().RenderShadow(params.device, params.descriptorCache, params.commandList);
+			});
 
 		listen<GBufferRender>("GBufferRender",
 			[&](GBufferRender params)

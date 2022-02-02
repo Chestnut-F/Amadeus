@@ -55,6 +55,15 @@ namespace Amadeus
         }
 	}
 
+    bool FinalPass::PreCompute(SharedPtr<DeviceResources> device, ID3D12GraphicsCommandList* commandList)
+    {
+        return true;
+    }
+
+    void FinalPass::PostPreCompute()
+    {
+    }
+
     void FinalPass::Setup(FrameGraph& fg, FrameGraphBuilder& builder, FrameGraphNode* node)
     {
         mBaseColor = builder.Read(

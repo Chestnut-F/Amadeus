@@ -5,11 +5,13 @@
 
 namespace Amadeus
 {
-	class ShadowPass
+	static constexpr UINT SSAO_SHADER_RESOURCE_SSAO_INDEX = 2;
+
+	class SSAOBlurPass
 		: public FrameGraphPass
 	{
 	public:
-		ShadowPass(SharedPtr<DeviceResources> device);
+		SSAOBlurPass(SharedPtr<DeviceResources> device);
 
 		bool PreCompute(SharedPtr<DeviceResources> device, ID3D12GraphicsCommandList* commandList) override;
 
@@ -26,9 +28,7 @@ namespace Amadeus
 		void Destroy() override;
 
 	private:
-		SharedPtr<FrameGraphResource> mShadowMap;
-
-		const UINT64 mWidth = 2048;
-		const UINT mHeight = 2048;
+		SharedPtr<FrameGraphResource> mSSAO;
+		SharedPtr<FrameGraphResource> mSSAOBlur;
 	};
 }

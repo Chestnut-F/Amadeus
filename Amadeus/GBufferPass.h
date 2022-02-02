@@ -11,6 +11,10 @@ namespace Amadeus
 	public:
 		GBufferPass(SharedPtr<DeviceResources> device);
 
+		bool PreCompute(SharedPtr<DeviceResources> device, ID3D12GraphicsCommandList* commandList) override;
+
+		void PostPreCompute() override;
+
 		void Setup(FrameGraph& fg, FrameGraphBuilder& builder, FrameGraphNode* node) override;
 
 		void RegisterResource(SharedPtr<DeviceResources> device, SharedPtr<DescriptorCache> descriptorCache) override;
@@ -29,5 +33,6 @@ namespace Amadeus
 		SharedPtr<FrameGraphResource> mDepth;
 
 		SharedPtr<FrameGraphResource> mShadowMap;
+		SharedPtr<FrameGraphResource> mSSAO;
 	};
 }

@@ -91,6 +91,20 @@ namespace Amadeus
 		ID3D12GraphicsCommandList* commandList;
 	};
 
+	struct ZPreRender
+	{
+		std::shared_ptr<DeviceResources> device;
+		std::shared_ptr<DescriptorCache> descriptorCache;
+		ID3D12GraphicsCommandList* commandList;
+	};
+
+	struct SSAORender
+	{
+		std::shared_ptr<DeviceResources> device;
+		std::shared_ptr<DescriptorCache> descriptorCache;
+		ID3D12GraphicsCommandList* commandList;
+	};
+
 	inline void Registry::regis()
 	{
 		regis<MouseWheel>("MouseWheel");
@@ -99,5 +113,7 @@ namespace Amadeus
 		regis<MouseButtonUp>("MouseButtonUp");
 		regis<GBufferRender>("GBufferRender");
 		regis<ShadowMapRender>("ShadowMapRender");
+		regis<ZPreRender>("ZPreRender");
+		regis<SSAORender>("SSAORender");
 	}
 }

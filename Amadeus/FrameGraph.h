@@ -28,6 +28,10 @@ namespace Amadeus
 	public:
 		FrameGraphNode(FrameGraph& fg, FrameGraphPass* pass);
 
+		bool PreCompute(SharedPtr<DeviceResources> device, ID3D12GraphicsCommandList* commandList);
+
+		void PostPreCompute();
+
 		void Setup(FrameGraph& fg, FrameGraphBuilder& builder);
 
 		void RegisterResource(SharedPtr<DeviceResources> device, SharedPtr<DescriptorCache> descriptorCache);
@@ -50,6 +54,8 @@ namespace Amadeus
 		~FrameGraph() noexcept;
 
 		void AddPass(const String& passName, SharedPtr<DeviceResources> device);
+
+		void PreCompute(SharedPtr<DeviceResources> device, SharedPtr<RenderSystem> renderer);
 
 		void Setup();
 

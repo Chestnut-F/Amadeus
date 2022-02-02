@@ -35,6 +35,9 @@ namespace Amadeus
 		psoDesc.RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
 		psoDesc.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
 		psoDesc.DepthStencilState = CD3DX12_DEPTH_STENCIL_DESC(D3D12_DEFAULT);
+		psoDesc.DepthStencilState.DepthEnable = TRUE;
+		psoDesc.DepthStencilState.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ZERO;
+		psoDesc.DepthStencilState.DepthFunc = D3D12_COMPARISON_FUNC_EQUAL;
 		psoDesc.SampleMask = UINT_MAX;
 		psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
 		psoDesc.NumRenderTargets = 4;
@@ -65,6 +68,15 @@ namespace Amadeus
 		}
     }
 
+	bool GBufferPass::PreCompute(SharedPtr<DeviceResources> device, ID3D12GraphicsCommandList* commandList)
+	{
+		return true;
+	}
+
+	void GBufferPass::PostPreCompute()
+	{
+	}
+
 	void GBufferPass::Setup(FrameGraph& fg, FrameGraphBuilder& builder, FrameGraphNode* node)
 	{
 		mNormal = builder.Write(
@@ -91,8 +103,8 @@ namespace Amadeus
 			DXGI_FORMAT_R8G8B8A8_UNORM,
 			fg, node);
 
-		mDepth = builder.Write(
-			"GBufferDepthTest",
+		mDepth = builder.Read(
+			"ZPreDepth",
 			FrameGraphResourceType::DEPTH,
 			DXGI_FORMAT_D32_FLOAT,
 			fg, node);
@@ -102,6 +114,12 @@ namespace Amadeus
 			FrameGraphResourceType::DEPTH,
 			DXGI_FORMAT_D32_FLOAT,
 			fg, node);
+
+		mSSAO = builder.Read(
+			"SSAOBlur",
+			FrameGraphResourceType::RENDER_TARGET,
+			DXGI_FORMAT_R32_FLOAT,
+			fg, node);
 	}
 
 	void GBufferPass::RegisterResource(SharedPtr<DeviceResources> device, SharedPtr<DescriptorCache> descriptorCache)
@@ -110,7 +128,7 @@ namespace Amadeus
 		mBaseColor->RegisterResource(device, descriptorCache);
 		mMetallicSpecularRoughness->RegisterResource(device, descriptorCache);
 		mVelocity->RegisterResource(device, descriptorCache);
-		mDepth->RegisterResource(device, descriptorCache);
+		// mDepth->RegisterResource(device, descriptorCache);
 	}
 
 	bool GBufferPass::Execute(
@@ -120,7 +138,7 @@ namespace Amadeus
 		UINT curFrameIndex = device->GetCurrentFrameIndex();
 		auto& commandList = mCommandLists[curFrameIndex];
 
-		CD3DX12_CPU_DESCRIPTOR_HANDLE dsvHandle = mDepth->GetWriteView(commandList.Get());
+		CD3DX12_CPU_DESCRIPTOR_HANDLE dsvHandle = mDepth->GetDepthStencilView(commandList.Get());
 		CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle[] =
 		{
 			mNormal->GetWriteView(commandList.Get()),
@@ -133,7 +151,6 @@ namespace Amadeus
 		commandList->ClearRenderTargetView(rtvHandle[1], BackgroundColor, 0, nullptr);
 		commandList->ClearRenderTargetView(rtvHandle[2], BackgroundColor, 0, nullptr);
 		commandList->ClearRenderTargetView(rtvHandle[3], BackgroundColor, 0, nullptr);
-		commandList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 
 		commandList->OMSetRenderTargets(4, &rtvHandle[0], FALSE, &dsvHandle);
 
@@ -141,7 +158,10 @@ namespace Amadeus
 			COMMON_SAMPLER_ROOT_TABLE_INDEX, descriptorManager->GetSamplerHeap()->GetGPUDescriptorHandleForHeapStart());
 
 		commandList->SetGraphicsRootDescriptorTable(
-			COMMON_RENDER_TARGET_ROOT_TABLE_INDEX, mShadowMap->GetReadView(commandList.Get()));
+			COMMON_RENDER_TARGET_SHADOW_TABLE_INDEX, mShadowMap->GetReadView(commandList.Get()));
+
+		commandList->SetGraphicsRootDescriptorTable(
+			COMMON_RENDER_TARGET_SSAO_TABLE_INDEX, mSSAO->GetReadView(commandList.Get()));
 
 		// GBuffer Render
 		GBufferRender params = {};
