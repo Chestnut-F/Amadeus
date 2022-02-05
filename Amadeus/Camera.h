@@ -64,7 +64,7 @@ namespace Amadeus
 		bool bFirstFrame = true;
 
 		UINT mSampleIndex = 0;
-		const UINT mNumSamples = 1024;
+		const UINT mNumSamples = 8;
 
 		XMFLOAT2 Hammersley2d(UINT i, UINT N);
 		XMMATRIX GetViewMatrix();

@@ -115,9 +115,9 @@ namespace Amadeus
 		XMMATRIX res = XMMatrixPerspectiveFovLH(mFov, mAspectRatio, mNearPlane, mFarPlane);
 		float jitterX = (hammersley.x * 2.f - 1.f) / (float)SCREEN_WIDTH;
 		float jitterY = (hammersley.y * 2.f - 1.f) / (float)SCREEN_HEIGHT;
-		mCameraConstantBuffer.jitter = XMFLOAT2((float)(jitterX / 2), (float)(-jitterY / 2));
-		//res.r[2].m128_f32[0] += jitterX;
-		//res.r[2].m128_f32[1] += jitterY;
+		mCameraConstantBuffer.jitter = XMFLOAT2(0.0f, 0.0f);
+		res.r[0].m128_f32[2] += jitterX;
+		res.r[1].m128_f32[2] += jitterY;
 		return res;
 	}
 

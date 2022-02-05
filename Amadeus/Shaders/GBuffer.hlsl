@@ -1,5 +1,16 @@
 #include "Common.hlsli"
 
+cbuffer CameraConstants : register(b0)
+{
+    float4x4 cameraViewMatrix;
+    float4x4 cameraProjectionMatrix;
+    float3 cameraPosWorld;
+    float cameraNearPlane;
+    float cameraFarPlane;
+    float2 cameraJitter;
+    uint bFirstFrame;
+};
+
 cbuffer MaterialConstants : register(b2)
 {
     float4 baseColorFactor;
