@@ -186,6 +186,9 @@
     <ClInclude Include="ZPrePass.h">
       <Filter>Render Pass\Header</Filter>
     </ClInclude>
+    <ClInclude Include="TAAPass.h">
+      <Filter>Render Pass\Header</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Root.cpp">
@@ -281,6 +284,9 @@
     <ClCompile Include="ZPrePass.cpp">
       <Filter>Render Pass\Source</Filter>
     </ClCompile>
+    <ClCompile Include="TAAPass.cpp">
+      <Filter>Render Pass\Source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\GBuffer.hlsl">
@@ -304,15 +310,6 @@
     <FxCompile Include="Shaders\VertexShader.hlsl">
       <Filter>Shader Files\VertexShaders</Filter>
     </FxCompile>
-    <FxCompile Include="Shaders\ScreenSpaceVS.hlsl">
-      <Filter>Shader Files\PixelShaders</Filter>
-    </FxCompile>
-    <FxCompile Include="Shaders\SSAO.hlsl">
-      <Filter>Shader Files\VertexShaders</Filter>
-    </FxCompile>
-    <FxCompile Include="Shaders\SSAOBlur.hlsl">
-      <Filter>Shader Files\VertexShaders</Filter>
-    </FxCompile>
     <FxCompile Include="Shaders\ZPrePS.hlsl">
       <Filter>Shader Files\PixelShaders</Filter>
     </FxCompile>
@@ -320,6 +317,24 @@
       <Filter>Shader Files\Common</Filter>
     </FxCompile>
     <FxCompile Include="Shaders\ZPreVS.hlsl">
+      <Filter>Shader Files\VertexShaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\TAAVS.hlsl">
+      <Filter>Shader Files\VertexShaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\TAAPS.hlsl">
+      <Filter>Shader Files\PixelShaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\TAARS.hlsli">
+      <Filter>Shader Files\Common</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\SSAO.hlsl">
+      <Filter>Shader Files\PixelShaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\SSAOBlur.hlsl">
+      <Filter>Shader Files\PixelShaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\ScreenSpaceVS.hlsl">
       <Filter>Shader Files\VertexShaders</Filter>
     </FxCompile>
   </ItemGroup>

@@ -44,7 +44,7 @@ namespace Amadeus
 		psoDesc.RTVFormats[0] = DXGI_FORMAT_R10G10B10A2_UNORM;
 		psoDesc.RTVFormats[1] = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
 		psoDesc.RTVFormats[2] = DXGI_FORMAT_R8G8B8A8_UNORM;
-		psoDesc.RTVFormats[3] = DXGI_FORMAT_R8G8B8A8_UNORM;
+		psoDesc.RTVFormats[3] = DXGI_FORMAT_R16G16_FLOAT;
 		psoDesc.DSVFormat = DXGI_FORMAT_D32_FLOAT;
 		psoDesc.SampleDesc.Count = 1;
 		ThrowIfFailed(device->GetD3DDevice()->CreateGraphicsPipelineState(
@@ -100,7 +100,7 @@ namespace Amadeus
 		mVelocity = builder.Write(
 			"Velocity",
 			FrameGraphResourceType::RENDER_TARGET,
-			DXGI_FORMAT_R8G8B8A8_UNORM,
+			DXGI_FORMAT_R16G16_FLOAT,
 			fg, node);
 
 		mDepth = builder.Read(
@@ -128,7 +128,6 @@ namespace Amadeus
 		mBaseColor->RegisterResource(device, descriptorCache);
 		mMetallicSpecularRoughness->RegisterResource(device, descriptorCache);
 		mVelocity->RegisterResource(device, descriptorCache);
-		// mDepth->RegisterResource(device, descriptorCache);
 	}
 
 	bool GBufferPass::Execute(

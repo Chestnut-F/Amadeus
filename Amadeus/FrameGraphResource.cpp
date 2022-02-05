@@ -111,7 +111,7 @@ namespace Amadeus
 
 	CD3DX12_GPU_DESCRIPTOR_HANDLE FrameGraphResource::GetReadView(ID3D12GraphicsCommandList* commandList)
 	{
-		assert(bRegistered && !bEarlyZ);
+		assert(bRegistered);
 		CD3DX12_RESOURCE_BARRIER transition;
 
 		switch (mType)
@@ -123,15 +123,25 @@ namespace Amadeus
 			break;
 		case FrameGraphResourceType::DEPTH:
 		case FrameGraphResourceType::STENCIL:
-			transition = CD3DX12_RESOURCE_BARRIER::Transition(
-				mResource.Get(), D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
-			commandList->ResourceBarrier(1, &transition);
+			if (bEarlyZ)
+			{
+				transition = CD3DX12_RESOURCE_BARRIER::Transition(
+					mResource.Get(), D3D12_RESOURCE_STATE_DEPTH_READ, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+				commandList->ResourceBarrier(1, &transition);
+			}
+			else
+			{
+				transition = CD3DX12_RESOURCE_BARRIER::Transition(
+					mResource.Get(), D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+				commandList->ResourceBarrier(1, &transition);
+			}
 			break;
 		default:
 			throw Exception("Invaild View Type.");
 		}
 
 		bRead = true;
+		bEarlyZ = false;
 
 		return mReadHandle;
 	}
@@ -194,6 +204,12 @@ namespace Amadeus
 		mReadHandle = cache->AppendSrvCache(device, mResource.Get(), srvDesc);
 
 		return mReadHandle;
+	}
+
+	ID3D12Resource* FrameGraphResource::GetResource()
+	{
+		assert(bRegistered);
+		return mResource.Get();
 	}
 
 	void FrameGraphResource::Connect(DependencyGraph& graph, DependencyGraph::Node* to)

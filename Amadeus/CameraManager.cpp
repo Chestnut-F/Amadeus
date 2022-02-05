@@ -73,6 +73,14 @@ namespace Amadeus
 			CD3DX12_GPU_DESCRIPTOR_HANDLE cameraConstantsHandle = params.descriptorCache->AppendCbvCache(params.device, cbvDesc);
 			params.commandList->SetGraphicsRootConstantBufferView(COMMON_CAMERA_ROOT_CBV_INDEX, cbvDesc.BufferLocation);
 		});
+
+		listen<TAARender>("TAARender",
+			[&](TAARender params)
+		{
+			D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc = GetDefaultCamera().GetCbvDesc(params.device);
+			CD3DX12_GPU_DESCRIPTOR_HANDLE cameraConstantsHandle = params.descriptorCache->AppendCbvCache(params.device, cbvDesc);
+			params.commandList->SetGraphicsRootConstantBufferView(COMMON_CAMERA_ROOT_CBV_INDEX, cbvDesc.BufferLocation);
+		});
 	}
 
 	void CameraManager::PreRender(float elapsedSeconds)

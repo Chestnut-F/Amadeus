@@ -8,6 +8,7 @@
 #include "SSAOPass.h"
 #include "SSAOBlurPass.h"
 #include "GBufferPass.h"
+#include "TAAPass.h"
 #include "FinalPass.h"
 
 namespace Amadeus
@@ -29,6 +30,10 @@ namespace Amadeus
 		.ctor<std::shared_ptr<DeviceResources>>();
 
 	auto GBufferPassFactory = meta::reflect<GBufferPass>(MetaRenderPassHash("GBufferPass"))
+		.base<FrameGraphPass>()
+		.ctor<std::shared_ptr<DeviceResources>>();
+
+	auto TAAPassFactory = meta::reflect<TAAPass>(MetaRenderPassHash("TAAPass"))
 		.base<FrameGraphPass>()
 		.ctor<std::shared_ptr<DeviceResources>>();
 

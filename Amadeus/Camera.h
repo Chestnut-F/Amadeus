@@ -13,7 +13,10 @@ namespace Amadeus
 			XMFLOAT3 eyePosWorld;
 			float nearPlane;
 			float farPlane;
-			float padding[27];
+			XMFLOAT2 jitter;
+			UINT32 firstFrame;
+			XMFLOAT4X4 prevViewProjection;
+			float padding1[8];
 		};
 		static_assert((sizeof(CameraConstantBuffer) % 256) == 0, "Constant Buffer size must be 256-byte aligned");
 
@@ -32,8 +35,6 @@ namespace Amadeus
 		XMVECTOR GetLookDirection();
 		XMVECTOR GetUpirection();
 		float GetRadius();
-		XMMATRIX GetViewMatrix();
-		XMMATRIX GetProjectionMatrix();
 		XMMATRIX GetTransformMatrix();
 		XMMATRIX GetTransformMatrixWithoutTranslation();
 		float GetNearPlane();
@@ -59,5 +60,14 @@ namespace Amadeus
 		CameraConstantBuffer mCameraConstantBuffer;
 		UINT8* pCameraCbvDataBegin;
 		const UINT mCameraConstantBufferSize = sizeof(CameraConstantBuffer);
+
+		bool bFirstFrame = true;
+
+		UINT mSampleIndex = 0;
+		const UINT mNumSamples = 1024;
+
+		XMFLOAT2 Hammersley2d(UINT i, UINT N);
+		XMMATRIX GetViewMatrix();
+		XMMATRIX GetProjectionMatrix(UINT i);
 	};
 }

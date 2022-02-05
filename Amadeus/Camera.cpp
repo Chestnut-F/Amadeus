@@ -19,6 +19,10 @@ namespace Amadeus
 		XMStoreFloat3(&mUpDirection, XMVector3Normalize(XMVector3Cross(forward, right)));
 		XMStoreFloat3(&mLookDirection, XMVector3Normalize(forward));
 		XMStoreFloat(&mRadius, XMVector3Length(forward));
+
+		XMStoreFloat4x4(&mCameraConstantBuffer.view, XMMatrixIdentity());
+		XMStoreFloat4x4(&mCameraConstantBuffer.projection, XMMatrixIdentity());
+		XMStoreFloat4x4(&mCameraConstantBuffer.prevViewProjection, XMMatrixIdentity());
 	}
 
 	void Camera::Upload(SharedPtr<DeviceResources> device)
@@ -44,6 +48,8 @@ namespace Amadeus
 
 	void Camera::Update(XMVECTOR position, XMVECTOR lookAt, XMVECTOR up)
 	{
+		XMMATRIX prev = XMMatrixMultiply(XMLoadFloat4x4(&mCameraConstantBuffer.projection), XMLoadFloat4x4(&mCameraConstantBuffer.view));
+
 		XMStoreFloat3(&mPosition, position);
 		XMStoreFloat3(&mLookAtPosition, lookAt);
 
@@ -55,11 +61,17 @@ namespace Amadeus
 		XMStoreFloat(&mRadius, XMVector3Length(forward));
 
 		XMStoreFloat4x4(&mCameraConstantBuffer.view, XMMatrixTranspose(GetViewMatrix()));
-		XMStoreFloat4x4(&mCameraConstantBuffer.projection, XMMatrixTranspose(GetProjectionMatrix()));
+		XMStoreFloat4x4(&mCameraConstantBuffer.projection, XMMatrixTranspose(GetProjectionMatrix(mSampleIndex)));
 		mCameraConstantBuffer.eyePosWorld = mPosition;
 		mCameraConstantBuffer.nearPlane = mNearPlane;
 		mCameraConstantBuffer.farPlane = mFarPlane;
+		mCameraConstantBuffer.firstFrame = bFirstFrame;
+		XMStoreFloat4x4(&mCameraConstantBuffer.prevViewProjection, prev);
+
+		mSampleIndex = (mSampleIndex + 1) % mNumSamples;
 		memcpy(pCameraCbvDataBegin, &mCameraConstantBuffer, mCameraConstantBufferSize);
+
+		bFirstFrame = false;
 	}
 
 	void Camera::Destroy()
@@ -97,9 +109,16 @@ namespace Amadeus
 		return XMMatrixLookToLH(XMLoadFloat3(&mPosition), XMLoadFloat3(&mLookDirection), XMLoadFloat3(&mUpDirection));
 	}
 
-	XMMATRIX Camera::GetProjectionMatrix()
+	XMMATRIX Camera::GetProjectionMatrix(UINT i)
 	{
-		return XMMatrixPerspectiveFovLH(mFov, mAspectRatio, mNearPlane, mFarPlane);
+		XMFLOAT2 hammersley = Hammersley2d(i, mNumSamples);
+		XMMATRIX res = XMMatrixPerspectiveFovLH(mFov, mAspectRatio, mNearPlane, mFarPlane);
+		float jitterX = (hammersley.x * 2.f - 1.f) / (float)SCREEN_WIDTH;
+		float jitterY = (hammersley.y * 2.f - 1.f) / (float)SCREEN_HEIGHT;
+		mCameraConstantBuffer.jitter = XMFLOAT2((float)(jitterX / 2), (float)(-jitterY / 2));
+		//res.r[2].m128_f32[0] += jitterX;
+		//res.r[2].m128_f32[1] += jitterY;
+		return res;
 	}
 
 	XMMATRIX Camera::GetTransformMatrix()
@@ -137,5 +156,17 @@ namespace Amadeus
 		cbvDesc.BufferLocation = mCameraConstants->GetGPUVirtualAddress();
 		cbvDesc.SizeInBytes = mCameraConstantBufferSize;
 		return std::move(cbvDesc);
+	}
+
+	// Radical inverse based on http://holger.dammertz.org/stuff/notes_HammersleyOnHemisphere.html
+	XMFLOAT2 Camera::Hammersley2d(UINT i, UINT N)
+	{
+		UINT bits = (i << 16u) | (i >> 16u);
+		bits = ((bits & 0x55555555u) << 1u) | ((bits & 0xAAAAAAAAu) >> 1u);
+		bits = ((bits & 0x33333333u) << 2u) | ((bits & 0xCCCCCCCCu) >> 2u);
+		bits = ((bits & 0x0F0F0F0Fu) << 4u) | ((bits & 0xF0F0F0F0u) >> 4u);
+		bits = ((bits & 0x00FF00FFu) << 8u) | ((bits & 0xFF00FF00u) >> 8u);
+		float rdi = float(bits) * 2.3283064365386963e-10;
+		return XMFLOAT2(float(i) / float(N), rdi);
 	}
 }

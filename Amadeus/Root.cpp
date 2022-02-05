@@ -43,6 +43,7 @@ namespace Amadeus
 		mFrameGraph->AddPass("SSAOPass", mDeviceResources);
 		mFrameGraph->AddPass("SSAOBlurPass", mDeviceResources);
 		mFrameGraph->AddPass("GBufferPass", mDeviceResources);
+		mFrameGraph->AddPass("TAAPass", mDeviceResources);
 		mFrameGraph->AddPass("FinalPass", mDeviceResources);
 
 		Registry& registry = Registry::instance();

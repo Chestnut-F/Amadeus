@@ -67,7 +67,7 @@ namespace Amadeus
     void FinalPass::Setup(FrameGraph& fg, FrameGraphBuilder& builder, FrameGraphNode* node)
     {
         mBaseColor = builder.Read(
-            "BaseColor",
+            "TAABaseColor",
             FrameGraphResourceType::RENDER_TARGET,
             DXGI_FORMAT_R8G8B8A8_UNORM_SRGB,
             fg, node);

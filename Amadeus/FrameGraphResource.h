@@ -36,6 +36,8 @@ namespace Amadeus
 		CD3DX12_GPU_DESCRIPTOR_HANDLE AppendReadView(
 			SharedPtr<DeviceResources> device, SharedPtr<DescriptorCache> cache);
 
+		ID3D12Resource* GetResource();
+
 		void Connect(DependencyGraph& graph, DependencyGraph::Node* to);
 
 		void Destroy();
