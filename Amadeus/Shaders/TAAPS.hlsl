@@ -16,7 +16,6 @@ Texture2D<float4> prevFrame			: register(t1);
 Texture2D<float2> velocityBuffer	: register(t2);
 Texture2D<float>  depthBuffer		: register(t3);
 
-#define HIGH_FREQUENCY_SCALE 0.1f
 static const float2 gInvRenderTargetSize = float2(1.0 / 1280.0, 1.0 / 720.0);
 
 float LinearDepth(float depth)
@@ -163,7 +162,7 @@ float4 main(VSOutput input) : SV_TARGET
 	float3 Filtered = sum / TotalWeight;
 
 	// Sharpen
-	float3 highFreq = neighborhood[1] + neighborhood[3] + neighborhood[5] + neighborhood[7] - 4 * neighborhood[4];
+	float3 highFreq = (4 * neighborhood[4]) - neighborhood[1] - neighborhood[3] - neighborhood[5] - neighborhood[7];
 	float3 sharpen = Filtered + highFreq * HIGH_FREQUENCY_SCALE;
 	Filtered = saturate(sharpen);
 
