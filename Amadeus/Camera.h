@@ -10,13 +10,14 @@ namespace Amadeus
 		{
 			XMFLOAT4X4 view;
 			XMFLOAT4X4 projection;
+			XMFLOAT4X4 unjitteredProjection;
 			XMFLOAT3 eyePosWorld;
 			float nearPlane;
 			float farPlane;
 			XMFLOAT2 jitter;
 			UINT32 firstFrame;
 			XMFLOAT4X4 prevViewProjection;
-			float padding1[8];
+			float padding1[56];
 		};
 		static_assert((sizeof(CameraConstantBuffer) % 256) == 0, "Constant Buffer size must be 256-byte aligned");
 
@@ -69,5 +70,6 @@ namespace Amadeus
 		XMFLOAT2 Hammersley2d(UINT i, UINT N);
 		XMMATRIX GetViewMatrix();
 		XMMATRIX GetProjectionMatrix(UINT i);
+		XMMATRIX GetUnjitteredProjectionMatrix();
 	};
 }

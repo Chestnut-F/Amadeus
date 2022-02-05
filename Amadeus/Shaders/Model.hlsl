@@ -24,10 +24,12 @@ cbuffer CameraConstants : register(b0)
 {
     float4x4 cameraViewMatrix;
     float4x4 cameraProjectionMatrix;
+    float4x4 cameraUnjitteredProjectionMatrix;
     float3 cameraPosWorld;
     float cameraNearPlane;
     float cameraFarPlane;
-    float3 padding0;
+    float2 cameraJitter;
+    uint bFirstFrame;
     float4x4 cameraPrevViewProjectionMatrix;
 };
 
@@ -60,7 +62,7 @@ VSOutput main(VSInput input)
     float4 posW = mul(float4(input.position, 1.0f), modelViewMatrix);
     output.positionW = posW.xyz;
     output.position = mul(posW, cameraProjectionMatrix);
-    output.curCoord = output.position;
+    output.curCoord = mul(posW, cameraUnjitteredProjectionMatrix);
     output.prevCoord = mul(float4(input.position, 1.0f), modelToPrev);
 
     output.normal = mul(input.normal, (float3x3)modelMatrix);

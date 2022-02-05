@@ -4,11 +4,13 @@ cbuffer CameraConstants : register(b0)
 {
 	float4x4 cameraViewMatrix;
 	float4x4 cameraProjectionMatrix;
+	float4x4 cameraUnjitteredProjectionMatrix;
 	float3 cameraPosWorld;
 	float cameraNearPlane;
 	float cameraFarPlane;
 	float2 cameraJitter;
 	uint bFirstFrame;
+	float4x4 cameraPrevViewProjectionMatrix;
 };
 
 Texture2D<float4> currFrame			: register(t0);

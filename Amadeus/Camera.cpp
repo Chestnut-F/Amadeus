@@ -48,7 +48,7 @@ namespace Amadeus
 
 	void Camera::Update(XMVECTOR position, XMVECTOR lookAt, XMVECTOR up)
 	{
-		XMMATRIX prev = XMMatrixMultiply(XMLoadFloat4x4(&mCameraConstantBuffer.projection), XMLoadFloat4x4(&mCameraConstantBuffer.view));
+		XMMATRIX prev = XMMatrixMultiply(XMLoadFloat4x4(&mCameraConstantBuffer.unjitteredProjection), XMLoadFloat4x4(&mCameraConstantBuffer.view));
 
 		XMStoreFloat3(&mPosition, position);
 		XMStoreFloat3(&mLookAtPosition, lookAt);
@@ -62,6 +62,7 @@ namespace Amadeus
 
 		XMStoreFloat4x4(&mCameraConstantBuffer.view, XMMatrixTranspose(GetViewMatrix()));
 		XMStoreFloat4x4(&mCameraConstantBuffer.projection, XMMatrixTranspose(GetProjectionMatrix(mSampleIndex)));
+		XMStoreFloat4x4(&mCameraConstantBuffer.unjitteredProjection, GetUnjitteredProjectionMatrix());
 		mCameraConstantBuffer.eyePosWorld = mPosition;
 		mCameraConstantBuffer.nearPlane = mNearPlane;
 		mCameraConstantBuffer.farPlane = mFarPlane;
@@ -115,10 +116,15 @@ namespace Amadeus
 		XMMATRIX res = XMMatrixPerspectiveFovLH(mFov, mAspectRatio, mNearPlane, mFarPlane);
 		float jitterX = (hammersley.x * 2.f - 1.f) / (float)SCREEN_WIDTH;
 		float jitterY = (hammersley.y * 2.f - 1.f) / (float)SCREEN_HEIGHT;
-		mCameraConstantBuffer.jitter = XMFLOAT2(0.0f, 0.0f);
-		res.r[0].m128_f32[2] += jitterX;
-		res.r[1].m128_f32[2] += jitterY;
+		mCameraConstantBuffer.jitter = XMFLOAT2(jitterX, -jitterY);
+		res.r[2].m128_f32[0] += jitterX;
+		res.r[2].m128_f32[1] += jitterY;
 		return res;
+	}
+
+	XMMATRIX Camera::GetUnjitteredProjectionMatrix()
+	{
+		return XMMatrixPerspectiveFovLH(mFov, mAspectRatio, mNearPlane, mFarPlane);
 	}
 
 	XMMATRIX Camera::GetTransformMatrix()
