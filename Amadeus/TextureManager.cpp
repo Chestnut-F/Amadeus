@@ -4,7 +4,7 @@
 namespace Amadeus
 {
 	UINT64 TextureManager::LoadFromFile(
-		WString&& fileName, SharedPtr<DeviceResources> device, SharedPtr<DescriptorManager> descriptorManager)
+		WString&& fileName, TextureType type, SharedPtr<DeviceResources> device, SharedPtr<DescriptorManager> descriptorManager)
 	{
 		UINT64 id = mTextureIndices.size();
 
@@ -12,7 +12,7 @@ namespace Amadeus
 
 		if (textureIter == mTextureMap.end())
 		{
-			mTextureMap[fileName] = new Texture(std::move(fileName), device, descriptorManager);
+			mTextureMap[fileName] = new Texture(std::move(fileName), type, device, descriptorManager);
 			mTextureIndices.emplace_back(fileName);
 		}
 
@@ -137,6 +137,31 @@ namespace Amadeus
 			commandList->Release();
 		}
 		commandLists.clear();
+	}
+
+	void TextureManager::PreCompute(SharedPtr<DeviceResources> device)
+	{
+		ResourceUploadBatch upload(device->GetD3DDevice());
+
+		upload.Begin();
+
+		for (auto& item : mTextureMap)
+		{
+			auto& texture = item.second;
+			texture->PreCompute(upload);
+		}
+
+		// Upload the resources to the GPU.
+		auto finish = upload.End(device->GetCommandQueue());
+
+		// Wait for the upload thread to terminate
+		finish.wait();
+
+		for (auto& item : mTextureMap)
+		{
+			auto& texture = item.second;
+			texture->SetFiltered(true);
+		}
 	}
 
 	void TextureManager::Unload(WString&& fileName)

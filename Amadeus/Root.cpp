@@ -51,8 +51,7 @@ namespace Amadeus
 
 		Load();
 		Upload();
-
-		mFrameGraph->PreCompute(mDeviceResources, mRenderer);
+		PreCompute();
 	}
 
 	void Root::PreRender()
@@ -173,7 +172,7 @@ namespace Amadeus
 
 		Gltf::LoadGltf(L"Sponza", mDeviceResources, mDescriptorManager);
 
-		TextureManager::Instance().LoadFromFile(TEXTURE_EMPTY_ID, mDeviceResources, mDescriptorManager);
+		TextureManager::Instance().LoadFromFile(TEXTURE_EMPTY_ID, TextureType::OTHER, mDeviceResources, mDescriptorManager);
 
 		MeshManager& meshManager = MeshManager::Instance();
 		meshManager.Init();
@@ -193,6 +192,13 @@ namespace Amadeus
 		TextureManager::Instance().UploadAll(mDeviceResources, mRenderer);
 
 		MeshManager::Instance().UploadAll(mDeviceResources, mRenderer);
+	}
+
+	void Root::PreCompute()
+	{
+		TextureManager::Instance().PreCompute(mDeviceResources);
+
+		mFrameGraph->PreCompute(mDeviceResources, mRenderer);
 	}
 
 	std::shared_ptr<DeviceResources> Root::GetDeviceResources()

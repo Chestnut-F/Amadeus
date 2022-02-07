@@ -14,6 +14,7 @@ namespace Amadeus
 	template<typename T> using Function = std::function<T>;
 	template<typename T> using NumericLimits = std::numeric_limits<T>;
 	template<typename T> using Vector = std::vector<T>;
+	template<typename T> using Set = std::set<T>;
 	template<typename K, typename V> using Pair = std::pair<K, V>;
 	template<typename K, typename V> using Map = std::map<K, V>;
 	template<typename T> using UniquePtr = std::unique_ptr<T>;

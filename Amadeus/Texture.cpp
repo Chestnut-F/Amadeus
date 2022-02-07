@@ -3,9 +3,26 @@
 
 namespace Amadeus
 {
-    Texture::Texture(WString&& fileName, SharedPtr<DeviceResources> device, SharedPtr<DescriptorManager> descriptorManager)
+    Texture::Texture(WString&& fileName, TextureType type, SharedPtr<DeviceResources> device, SharedPtr<DescriptorManager> descriptorManager)
+        : bFiltered(true)
+        , mType(type)
+        , mName(fileName)
     {
         CreateFromFile(std::move(fileName));
+
+        if (mType == TextureType::BASE_COLOR && !mMetadata.IsCubemap() && mMetadata.mipLevels == 1)
+        {
+            bFiltered = false;
+            mMetadata.mipLevels = GetMipLevels();
+        }
+
+        // 是否支持自动生成Mipmaps
+        ResourceUploadBatch upload(device->GetD3DDevice());
+        if (!upload.IsSupportedForGenerateMips(mMetadata.format))
+        {
+            bFiltered = true;
+            mMetadata.mipLevels = 1;
+        }
 
         D3D12_RESOURCE_DESC textureDesc = {};
         textureDesc.MipLevels = mMetadata.mipLevels;
@@ -45,9 +62,25 @@ namespace Amadeus
         LoadFromFile(std::move(fileName));
     }
 
-    Texture::Texture(Vector<UINT8>&& image, SharedPtr<DeviceResources> device, SharedPtr<DescriptorManager> descriptorManager)
+    Texture::Texture(Vector<UINT8>&& image, TextureType type, SharedPtr<DeviceResources> device, SharedPtr<DescriptorManager> descriptorManager)
+        : bFiltered(true)
+        , mType(type)
     {
         CreateFromMemory(std::move(image));
+
+        if (mType == TextureType::BASE_COLOR && !mMetadata.IsCubemap() && mMetadata.mipLevels == 1)
+        {
+            bFiltered = false;
+            mMetadata.mipLevels = GetMipLevels();
+        }
+
+        // 是否支持自动生成Mipmaps
+        ResourceUploadBatch upload(device->GetD3DDevice());
+        if (!upload.IsSupportedForGenerateMips(mMetadata.format))
+        {
+            bFiltered = true;
+            mMetadata.mipLevels = 1;
+        }
 
         D3D12_RESOURCE_DESC textureDesc = {};
         textureDesc.MipLevels = mMetadata.mipLevels;
@@ -111,6 +144,19 @@ namespace Amadeus
         return true;
     }
 
+    bool Texture::PreCompute(ResourceUploadBatch& uploadBatch)
+    {
+        if (bFiltered) return bFiltered;
+        assert(!mMetadata.IsCubemap());
+
+        if (uploadBatch.IsSupportedForGenerateMips(mMetadata.format))
+        {
+            uploadBatch.GenerateMips(mTextureResource.Get());
+        }
+
+        return true;
+    }
+
     void Texture::Unload()
     {
         mImage.Release();
@@ -119,6 +165,12 @@ namespace Amadeus
     void Texture::Destroy()
     {
         mTextureResource->Release();
+    }
+
+    CD3DX12_CPU_DESCRIPTOR_HANDLE Texture::GetDescriptorHandle() 
+    { 
+        assert(bFiltered);
+        return mHandle; 
     }
 
     void Texture::CreateFromFile(WString&& fileName)
@@ -159,5 +211,16 @@ namespace Amadeus
         ThrowIfFailed(LoadFromWICMemory(image.data(), image.size(), WIC_FLAGS_NONE, nullptr, mImage));
     }
 
+    UINT16 Texture::GetMipLevels()
+    {
+        UINT16 mipLevels = 1;
+        size_t size = mMetadata.width;
+        while (size >> 1)
+        {
+            size >>= 1;
+            mipLevels++;
+        }
+        return mipLevels;
+    }
 
 }

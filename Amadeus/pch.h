@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include <cassert>
+#include <set>
 #include <map>
 #include <memory>
 #include <stdexcept>
@@ -23,6 +24,7 @@
 #include <DirectXColors.h>
 #include <DirectXMath.h>
 #include <DirectXTex.h>
+#include <ResourceUploadBatch.h>
 
 #if defined(_DEBUG)
 #include <dxgidebug.h>

@@ -32,6 +32,7 @@ namespace Amadeus
 	private:
 		void Load();
 		void Upload();
+		void PreCompute();
 
 		std::wstring mTitle;
 

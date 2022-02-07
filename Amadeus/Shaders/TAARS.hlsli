@@ -22,4 +22,4 @@
 SamplerState defaultSampler : register(s0);
 SamplerState depthSampler : register(s1);
 
-#define HIGH_FREQUENCY_SCALE 0.5f
+#define HIGH_FREQUENCY_SCALE 1.0f

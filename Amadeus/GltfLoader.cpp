@@ -103,12 +103,24 @@ namespace Amadeus
 		TextureManager& textureManager = TextureManager::Instance();
 		assert(textureManager.Empty());
 
+		Set<INT> baseColors;
+		for (auto& mat : model.materials)
+		{
+			INT baseColorId = mat.pbrMetallicRoughness.baseColorTexture.index;
+			baseColors.insert(baseColorId);
+		}
+
 		for (auto& tex : model.textures)
 		{
 			auto& image = model.images[tex.source];
+			TextureType type = TextureType::OTHER;
+
+			auto iter = baseColors.find(tex.source);
+			if (iter != baseColors.end())
+				type = TextureType::BASE_COLOR;
 
 			textureManager.LoadFromFile(
-				WString(L"Models\\" + fileName + L"\\" + String2WString(image.uri)), device, descriptorManager);
+				WString(L"Models\\" + fileName + L"\\" + String2WString(image.uri)), type, device, descriptorManager);
 		}
 	}
 

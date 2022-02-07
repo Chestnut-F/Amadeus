@@ -14,13 +14,15 @@ namespace Amadeus
 			return *instance;
 		}
 
-		UINT64 LoadFromFile(WString&& fileName, SharedPtr<DeviceResources> device, SharedPtr<DescriptorManager> descriptorManager);
+		UINT64 LoadFromFile(WString&& fileName, TextureType type, SharedPtr<DeviceResources> device, SharedPtr<DescriptorManager> descriptorManager);
 
 		bool Upload(WString&& fileName, SharedPtr<DeviceResources> device, ID3D12Resource* uploadHeap, ID3D12GraphicsCommandList* commandList);
 
 		bool Upload(UINT64 index, SharedPtr<DeviceResources> device, ID3D12Resource* uploadHeap, ID3D12GraphicsCommandList* commandList);
 
 		void UploadAll(SharedPtr<DeviceResources> device, SharedPtr<RenderSystem> renderer);
+
+		void PreCompute(SharedPtr<DeviceResources> device);
 
 		void Unload(WString&& fileName);
 
