@@ -171,6 +171,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <FxCompile Include="Shaders\GBufferTransparent.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.1</ShaderModel>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(OutDir)Shaders\%(Filename).cso</ObjectFileOutput>
+    </FxCompile>
     <FxCompile Include="Shaders\PixelShader.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
@@ -211,6 +216,22 @@
     </FxCompile>
     <FxCompile Include="Shaders\ShadowMapVS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.1</ShaderModel>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(OutDir)Shaders\%(Filename).cso</ObjectFileOutput>
+    </FxCompile>
+    <FxCompile Include="Shaders\SkyboxPS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.1</ShaderModel>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(OutDir)Shaders\%(Filename).cso</ObjectFileOutput>
+    </FxCompile>
+    <FxCompile Include="Shaders\SkyboxVS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.1</ShaderModel>
       <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(OutDir)Shaders\%(Filename).cso</ObjectFileOutput>
     </FxCompile>
@@ -284,6 +305,7 @@
     <ClInclude Include="Common\DescriptorCache.h" />
     <ClInclude Include="Common\DescriptorManager.h" />
     <ClInclude Include="Common\DeviceResources.h" />
+    <ClInclude Include="Common\EngineVar.h" />
     <ClInclude Include="Common\RootSignature.h" />
     <ClInclude Include="Common\StepTimer.h" />
     <ClInclude Include="Common\ThreadPool.h" />
@@ -297,6 +319,7 @@
     <ClInclude Include="FrameGraphPass.h" />
     <ClInclude Include="FrameGraphResource.h" />
     <ClInclude Include="GBufferPass.h" />
+    <ClInclude Include="GBufferTransparentPass.h" />
     <ClInclude Include="GltfLoader.h" />
     <ClInclude Include="Light.h" />
     <ClInclude Include="LightManager.h" />
@@ -316,6 +339,7 @@
     <ClInclude Include="ResourceManagers.h" />
     <ClInclude Include="Root.h" />
     <ClInclude Include="ShadowPass.h" />
+    <ClInclude Include="SkyboxPass.h" />
     <ClInclude Include="SSAOBlurPass.h" />
     <ClInclude Include="SSAOPass.h" />
     <ClInclude Include="Subject.h" />
@@ -330,12 +354,14 @@
     <ClCompile Include="Common\DescriptorCache.cpp" />
     <ClCompile Include="Common\DescriptorManager.cpp" />
     <ClCompile Include="Common\DeviceResources.cpp" />
+    <ClCompile Include="Common\EngineVar.cpp" />
     <ClCompile Include="DependencyGraph.cpp" />
     <ClCompile Include="FinalPass.cpp" />
     <ClCompile Include="FrameGraph.cpp" />
     <ClCompile Include="FrameGraphPass.cpp" />
     <ClCompile Include="FrameGraphResource.cpp" />
     <ClCompile Include="GBufferPass.cpp" />
+    <ClCompile Include="GBufferTransparentPass.cpp" />
     <ClCompile Include="GltfLoader.cpp" />
     <ClCompile Include="Light.cpp" />
     <ClCompile Include="LightManager.cpp" />
@@ -351,6 +377,7 @@
     <ClCompile Include="RenderSystem.cpp" />
     <ClCompile Include="Root.cpp" />
     <ClCompile Include="ShadowPass.cpp" />
+    <ClCompile Include="SkyboxPass.cpp" />
     <ClCompile Include="SSAOBlurPass.cpp" />
     <ClCompile Include="SSAOPass.cpp" />
     <ClCompile Include="TAAPass.cpp" />
@@ -398,6 +425,13 @@
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">rootsig_1.1</ShaderModel>
     </FxCompile>
     <FxCompile Include="Shaders\TAARS.hlsli">
+      <FileType>Document</FileType>
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Renderer_RootSig</EntryPointName>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">RootSignature</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">rootsig_1.1</ShaderModel>
+      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(OutDir)Shaders\%(Filename).cso</ObjectFileOutput>
+    </FxCompile>
+    <FxCompile Include="Shaders\SkyboxRS.hlsli">
       <FileType>Document</FileType>
       <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Renderer_RootSig</EntryPointName>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">RootSignature</ShaderType>

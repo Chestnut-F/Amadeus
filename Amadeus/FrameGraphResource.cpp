@@ -79,23 +79,38 @@ namespace Amadeus
 			switch (mType)
 			{
 			case FrameGraphResourceType::RENDER_TARGET:
+				if (mResourceState == D3D12_RESOURCE_STATE_RENDER_TARGET)
+				{
+					break;
+				}
 				transition = CD3DX12_RESOURCE_BARRIER::Transition(
-					mResource.Get(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_RENDER_TARGET);
+					mResource.Get(), mResourceState, D3D12_RESOURCE_STATE_RENDER_TARGET);
 				commandList->ResourceBarrier(1, &transition);
+				mResourceState = D3D12_RESOURCE_STATE_RENDER_TARGET;
 				break;
 			case FrameGraphResourceType::DEPTH:
 			case FrameGraphResourceType::STENCIL:
 				if (bEarlyZ)
 				{
+					if (mResourceState == D3D12_RESOURCE_STATE_DEPTH_WRITE)
+					{
+						break;
+					}
 					transition = CD3DX12_RESOURCE_BARRIER::Transition(
-						mResource.Get(), D3D12_RESOURCE_STATE_DEPTH_READ, D3D12_RESOURCE_STATE_DEPTH_WRITE);
+						mResource.Get(), mResourceState, D3D12_RESOURCE_STATE_DEPTH_WRITE);
 					commandList->ResourceBarrier(1, &transition);
+					mResourceState = D3D12_RESOURCE_STATE_DEPTH_WRITE;
 				}
 				else
 				{
+					if (mResourceState == D3D12_RESOURCE_STATE_DEPTH_WRITE)
+					{
+						break;
+					}
 					transition = CD3DX12_RESOURCE_BARRIER::Transition(
-						mResource.Get(), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_DEPTH_WRITE);
+						mResource.Get(), mResourceState, D3D12_RESOURCE_STATE_DEPTH_WRITE);
 					commandList->ResourceBarrier(1, &transition);
+					mResourceState = D3D12_RESOURCE_STATE_DEPTH_WRITE;
 				}
 				break;
 			default:
@@ -117,23 +132,38 @@ namespace Amadeus
 		switch (mType)
 		{
 		case FrameGraphResourceType::RENDER_TARGET:
+			if (mResourceState == D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE)
+			{
+				break;
+			}
 			transition = CD3DX12_RESOURCE_BARRIER::Transition(
-				mResource.Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+				mResource.Get(), mResourceState, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 			commandList->ResourceBarrier(1, &transition);
+			mResourceState = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
 			break;
 		case FrameGraphResourceType::DEPTH:
 		case FrameGraphResourceType::STENCIL:
 			if (bEarlyZ)
 			{
+				if (mResourceState == D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE)
+				{
+					break;
+				}
 				transition = CD3DX12_RESOURCE_BARRIER::Transition(
-					mResource.Get(), D3D12_RESOURCE_STATE_DEPTH_READ, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+					mResource.Get(), mResourceState, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 				commandList->ResourceBarrier(1, &transition);
+				mResourceState = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
 			}
 			else
 			{
+				if (mResourceState == D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE)
+				{
+					break;
+				}
 				transition = CD3DX12_RESOURCE_BARRIER::Transition(
-					mResource.Get(), D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+					mResource.Get(), mResourceState, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 				commandList->ResourceBarrier(1, &transition);
+				mResourceState = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
 			}
 			break;
 		default:
@@ -155,9 +185,14 @@ namespace Amadeus
 		{
 		case FrameGraphResourceType::DEPTH:
 		case FrameGraphResourceType::STENCIL:
+			if (mResourceState == D3D12_RESOURCE_STATE_DEPTH_READ)
+			{
+				break;
+			}
 			transition = CD3DX12_RESOURCE_BARRIER::Transition(
-				mResource.Get(), D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_STATE_DEPTH_READ);
+				mResource.Get(), mResourceState, D3D12_RESOURCE_STATE_DEPTH_READ);
 			commandList->ResourceBarrier(1, &transition);
+			mResourceState = D3D12_RESOURCE_STATE_DEPTH_READ;
 			break;
 		default:
 			throw Exception("Invaild View Type.");
@@ -280,6 +315,7 @@ namespace Amadeus
 			&clearValue,
 			IID_PPV_ARGS(&mResource)
 		));
+		mResourceState = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
 		SetName(mResource.Get(), String2WString(mName).c_str());
 	}
 
@@ -312,6 +348,7 @@ namespace Amadeus
 			&depthOptimizedClearValue,
 			IID_PPV_ARGS(&mResource)
 		));
+		mResourceState = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
 		SetName(mResource.Get(), String2WString(mName).c_str());
 	}
 
@@ -343,6 +380,7 @@ namespace Amadeus
 			&clearValue,
 			IID_PPV_ARGS(&mResource)
 		));
+		mResourceState = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
 		SetName(mResource.Get(), String2WString(mName).c_str());
 	}
 
@@ -375,6 +413,7 @@ namespace Amadeus
 			&depthOptimizedClearValue,
 			IID_PPV_ARGS(&mResource)
 		));
+		mResourceState = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
 		SetName(mResource.Get(), String2WString(mName).c_str());
 	}
 

@@ -79,6 +79,11 @@ namespace Amadeus
     void Primitive::RenderShadow(
         SharedPtr<DeviceResources> device, SharedPtr<DescriptorCache> descriptorCache, ID3D12GraphicsCommandList* commandList)
     {
+        if (mMaterial->IsAlphaMask())
+        {
+            return;
+        }
+
         commandList->IASetIndexBuffer(&mIndexBufferView);
         commandList->IASetVertexBuffers(0, 1, &mVertexBufferView);
         commandList->SetGraphicsRootConstantBufferView(COMMON_PRIMITIVE_ROOT_CBV_INDEX, mPrimitiveConstants->GetGPUVirtualAddress());
@@ -89,6 +94,11 @@ namespace Amadeus
     void Primitive::Render(
         SharedPtr<DeviceResources> device, SharedPtr<DescriptorCache> descriptorCache, ID3D12GraphicsCommandList* commandList)
     {
+        if (mMaterial->IsAlphaMask())
+        {
+            return;
+        }
+
         commandList->IASetIndexBuffer(&mIndexBufferView);
         commandList->IASetVertexBuffers(0, 1, &mVertexBufferView);
         commandList->SetGraphicsRootConstantBufferView(COMMON_PRIMITIVE_ROOT_CBV_INDEX, mPrimitiveConstants->GetGPUVirtualAddress());
@@ -121,6 +131,11 @@ namespace Amadeus
         cbvDesc.BufferLocation = mPrimitiveConstants->GetGPUVirtualAddress();
         cbvDesc.SizeInBytes = mPrimitiveConstantBufferSize;
         return std::move(cbvDesc);
+    }
+
+    bool Primitive::IsTransparent()
+    {
+        return mMaterial->IsTransparent();
     }
 
     void Primitive::StatBoundary()

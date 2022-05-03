@@ -26,6 +26,13 @@ namespace Amadeus
 				params.commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 				MeshManager::Instance().Render(params.device, params.descriptorCache, params.commandList);
 			});
+
+		listen<GBufferTransparentRender>("GBufferTransparentRender",
+			[&](GBufferTransparentRender params)
+			{
+				params.commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+				MeshManager::Instance().RenderTransparent(params.device, params.descriptorCache, params.commandList);
+			});
 	}
 
 	void MeshManager::Destroy()
@@ -165,6 +172,15 @@ namespace Amadeus
 		for (auto& mesh : mMeshList)
 		{
 			mesh->Render(device, descriptorCache, commandList);
+		}
+	}
+
+	void MeshManager::RenderTransparent(
+		SharedPtr<DeviceResources> device, SharedPtr<DescriptorCache> descriptorCache, ID3D12GraphicsCommandList* commandList)
+	{
+		for (auto& mesh : mMeshList)
+		{
+			mesh->RenderTransparent(device, descriptorCache, commandList);
 		}
 	}
 

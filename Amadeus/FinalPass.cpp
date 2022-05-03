@@ -66,10 +66,36 @@ namespace Amadeus
 
     void FinalPass::Setup(FrameGraph& fg, FrameGraphBuilder& builder, FrameGraphNode* node)
     {
-        mBaseColor = builder.Read(
-            "TAABaseColor",
+        if (EngineVar::TAA_Enable)
+        {
+            mBaseColor = builder.Read(
+                "TAABaseColor",
+                FrameGraphResourceType::RENDER_TARGET,
+                DXGI_FORMAT_R8G8B8A8_UNORM_SRGB,
+                fg, node);
+        }
+        else
+        {
+            mBaseColor = builder.Read(
+                "BaseColor",
+                FrameGraphResourceType::RENDER_TARGET,
+                DXGI_FORMAT_R8G8B8A8_UNORM_SRGB,
+                fg, node);
+        }
+
+        if (EngineVar::Draw_Sky)
+        {
+            mSky = builder.Read(
+                "Sky",
+                FrameGraphResourceType::RENDER_TARGET,
+                DXGI_FORMAT_R8G8B8A8_UNORM,
+                fg, node);
+        }
+
+        mTransparent = builder.Read(
+            "Transparent",
             FrameGraphResourceType::RENDER_TARGET,
-            DXGI_FORMAT_R8G8B8A8_UNORM_SRGB,
+            DXGI_FORMAT_R8G8B8A8_UNORM,
             fg, node);
     }
 
@@ -93,9 +119,12 @@ namespace Amadeus
         D3D12_CPU_DESCRIPTOR_HANDLE renderTargetView = device->GetRenderTargetView();
         D3D12_CPU_DESCRIPTOR_HANDLE depthStencilView = device->GetDepthStencilView();
         mCommandLists[curFrameIndex]->OMSetRenderTargets(1, &renderTargetView, false, &depthStencilView);
-        const float clearColor[] = { 0.0f, 0.2f, 0.4f, 1.0f };
-        mCommandLists[curFrameIndex]->ClearRenderTargetView(renderTargetView, clearColor, 0, nullptr);
-        mCommandLists[curFrameIndex]->ClearDepthStencilView(depthStencilView, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
+        if (!EngineVar::Draw_Sky)
+        {
+            const float clearColor[] = { 0.0f, 0.2f, 0.4f, 1.0f };
+            mCommandLists[curFrameIndex]->ClearRenderTargetView(renderTargetView, clearColor, 0, nullptr);
+            mCommandLists[curFrameIndex]->ClearDepthStencilView(depthStencilView, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
+        }
 
         CD3DX12_GPU_DESCRIPTOR_HANDLE srvHandle = mBaseColor->GetReadView(mCommandLists[curFrameIndex].Get());
         mCommandLists[curFrameIndex]->SetGraphicsRootDescriptorTable(5, srvHandle);

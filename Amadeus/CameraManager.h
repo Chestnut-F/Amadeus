@@ -8,7 +8,7 @@ namespace Amadeus
 	static constexpr float FORWARD_SPEED = 1.0f;
 	static constexpr float LATERAL_SPEED = 1.0f;
 	static constexpr float ROTATION_SPEED = 1.0f;
-	static constexpr float MAX_RADIUS = 800.0f;
+	static constexpr float MAX_RADIUS = 1600.0f;
 
 	class CameraManager : public Observer
 	{
@@ -35,7 +35,7 @@ namespace Amadeus
 			float fov = XM_PI / 3.0f, 
 			float aspectRatio = 16.0f / 9.0f, 
 			float nearPlane = 1.0f, 
-			float farPlane = 1000.0f);
+			float farPlane = 2000.0f);
 
 		void Upload(SharedPtr<DeviceResources> device);
 

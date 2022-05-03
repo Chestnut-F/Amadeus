@@ -67,8 +67,6 @@ int Application::Run(HINSTANCE hInstance, int nCmdShow)
         }
     }
 
-    mRoot->Destroy();
-
     // Return this part of the WM_QUIT message to Windows.
     return static_cast<char>(msg.wParam);
 }

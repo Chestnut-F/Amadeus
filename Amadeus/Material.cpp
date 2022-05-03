@@ -129,7 +129,8 @@ namespace Amadeus
 
 	void Material::Render(SharedPtr<DeviceResources> device, SharedPtr<DescriptorCache> descriptorCache, ID3D12GraphicsCommandList* commandList)
 	{
-		Texture* whiteTexture = TextureManager::Instance().GetTexture(TEXTURE_EMPTY_ID);
+		Texture* whiteTexture = TextureManager::Instance().GetTexture(EngineVar::TEXTURE_WHITE_ID);
+		Texture* blackTexture = TextureManager::Instance().GetTexture(EngineVar::TEXTURE_BLACK_ID);
 
 		D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc = {};
 		cbvDesc.BufferLocation = mMaterialConstants->GetGPUVirtualAddress();
@@ -159,16 +160,6 @@ namespace Amadeus
 			descriptorCache->AppendSrvCache(device, whiteTexture->GetDescriptorHandle());
 		}
 
-		if (mType & MATERIAL_TYPE_NORMAL
-			&& bInitialized & MATERIAL_TYPE_NORMAL)
-		{
-			descriptorCache->AppendSrvCache(device, mNormal->GetDescriptorHandle());
-		}
-		else
-		{
-			descriptorCache->AppendSrvCache(device, whiteTexture->GetDescriptorHandle());
-		}
-
 		if (mType & MATERIAL_TYPE_OCCLUSION
 			&& bInitialized & MATERIAL_TYPE_OCCLUSION)
 		{
@@ -183,6 +174,16 @@ namespace Amadeus
 			&& bInitialized & MATERIAL_TYPE_EMISSIVE)
 		{
 			descriptorCache->AppendSrvCache(device, mEmissive->GetDescriptorHandle());
+		}
+		else
+		{
+			descriptorCache->AppendSrvCache(device, blackTexture->GetDescriptorHandle());
+		}
+
+		if (mType & MATERIAL_TYPE_NORMAL
+			&& bInitialized & MATERIAL_TYPE_NORMAL)
+		{
+			descriptorCache->AppendSrvCache(device, mNormal->GetDescriptorHandle());
 		}
 		else
 		{

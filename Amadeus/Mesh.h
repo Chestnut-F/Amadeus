@@ -31,6 +31,9 @@ namespace Amadeus
 
 		void Render(SharedPtr<DeviceResources> device, 
 			SharedPtr<DescriptorCache> descriptorCache, ID3D12GraphicsCommandList* commandList);
+
+		void RenderTransparent(SharedPtr<DeviceResources> device,
+			SharedPtr<DescriptorCache> descriptorCache, ID3D12GraphicsCommandList* commandList);
 		
 		void Destroy();
 

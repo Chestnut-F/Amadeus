@@ -123,7 +123,12 @@ namespace Amadeus
 
 	void DescriptorCache::Destroy()
 	{
-
+		for (auto& cache : mCbvSrvUavCaches)
+		{
+			cache->Release();
+		}
+		mRtvCache->Release();
+		mDsvCache->Release();
 	}
 
 	void DescriptorCache::CreateCbvSrvUavCache(std::shared_ptr<DeviceResources> device)

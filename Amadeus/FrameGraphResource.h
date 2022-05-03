@@ -64,6 +64,7 @@ namespace Amadeus
 		ComPtr<ID3D12Resource> mResource;
 		CD3DX12_CPU_DESCRIPTOR_HANDLE mWriteHandle;
 		CD3DX12_GPU_DESCRIPTOR_HANDLE mReadHandle;
+		D3D12_RESOURCE_STATES mResourceState;
 
 		bool bRegistered;
 		bool bWritten;

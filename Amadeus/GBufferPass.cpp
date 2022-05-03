@@ -162,6 +162,14 @@ namespace Amadeus
 		commandList->SetGraphicsRootDescriptorTable(
 			COMMON_RENDER_TARGET_SSAO_TABLE_INDEX, mSSAO->GetReadView(commandList.Get()));
 
+		Texture* skybox = TextureManager::Instance().GetTexture(EngineVar::CUBEMAP_ENNIS_ID);
+		Texture* lut = TextureManager::Instance().GetTexture(EngineVar::TEXTURE_BRDF_LUT_ID);
+		CD3DX12_GPU_DESCRIPTOR_HANDLE iblHandle[] = {
+			descriptorCache->AppendSrvCache(device, lut->GetDescriptorHandle()),
+			descriptorCache->AppendSrvCache(device, skybox->GetDescriptorHandle()),
+		};
+		commandList->SetGraphicsRootDescriptorTable(7, *iblHandle);
+
 		// GBuffer Render
 		GBufferRender params = {};
 		params.device = device;

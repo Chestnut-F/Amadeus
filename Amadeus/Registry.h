@@ -112,6 +112,20 @@ namespace Amadeus
 		ID3D12GraphicsCommandList* commandList;
 	};
 
+	struct SkyboxRender
+	{
+		std::shared_ptr<DeviceResources> device;
+		std::shared_ptr<DescriptorCache> descriptorCache;
+		ID3D12GraphicsCommandList* commandList;
+	};
+
+	struct GBufferTransparentRender
+	{
+		std::shared_ptr<DeviceResources> device;
+		std::shared_ptr<DescriptorCache> descriptorCache;
+		ID3D12GraphicsCommandList* commandList;
+	};
+
 	inline void Registry::regis()
 	{
 		regis<MouseWheel>("MouseWheel");
@@ -123,5 +137,7 @@ namespace Amadeus
 		regis<ZPreRender>("ZPreRender");
 		regis<SSAORender>("SSAORender");
 		regis<TAARender>("TAARender");
+		regis<SkyboxRender>("SkyboxRender");
+		regis<GBufferTransparentRender>("GBufferTransparentRender");
 	}
 }

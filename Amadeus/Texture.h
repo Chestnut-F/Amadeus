@@ -3,17 +3,18 @@
 
 namespace Amadeus
 {
-    static constexpr wchar_t TEXTURE_EMPTY_ID[19] = L"Textures\\white.png";
-
     enum class TextureType
     {
         BASE_COLOR,
+        CUBE_MAP,
         OTHER,
+        DEFAULT,
+        NUM_TEXTURE_TYPE,
     };
 
 	class Texture
 	{
-	public:
+    public:
         Texture(WString&& fileName, TextureType type, SharedPtr<DeviceResources> device, SharedPtr<DescriptorManager> descriptorManager);
 
         Texture(Vector<UINT8>&& image, TextureType type, SharedPtr<DeviceResources> device, SharedPtr<DescriptorManager> descriptorManager);
@@ -31,6 +32,8 @@ namespace Amadeus
         CD3DX12_CPU_DESCRIPTOR_HANDLE GetDescriptorHandle();
 
         void SetFiltered(bool filtered) { bFiltered = filtered; }
+
+        TextureType GetType() { return mType; }
 
 	private:
         void CreateFromFile(WString&& fileName);
@@ -53,5 +56,9 @@ namespace Amadeus
 
         bool bFiltered = true;
         WString mName;
+
+        // Cube Map
+        ComPtr<ID3D12Resource> mUploadHeap;
+        Vector<D3D12_SUBRESOURCE_DATA> mSubresources;
 	};
 }

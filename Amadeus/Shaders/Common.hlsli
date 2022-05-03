@@ -7,6 +7,7 @@
     "DescriptorTable(SRV(t0, numDescriptors = 5), visibility = SHADER_VISIBILITY_PIXEL)," \
     "DescriptorTable(SRV(t5, numDescriptors = 1), visibility = SHADER_VISIBILITY_PIXEL)," \
     "DescriptorTable(SRV(t6, numDescriptors = 1), visibility = SHADER_VISIBILITY_PIXEL)," \
+    "DescriptorTable(SRV(t7, numDescriptors = 2), visibility = SHADER_VISIBILITY_PIXEL)," \
     "DescriptorTable(Sampler(s0, numDescriptors = 1), visibility = SHADER_VISIBILITY_PIXEL)," \
     "StaticSampler(s1, maxAnisotropy = 8, visibility = SHADER_VISIBILITY_PIXEL)," \
     "StaticSampler(s2, visibility = SHADER_VISIBILITY_PIXEL," \

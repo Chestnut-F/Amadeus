@@ -89,7 +89,7 @@ namespace Amadeus
 		for (auto& item : mTextureMap)
 		{
 			auto& texture = item.second;
-			const CD3DX12_RESOURCE_DESC resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(texture->GetUploadBufferSize());
+			CD3DX12_RESOURCE_DESC resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(texture->GetUploadBufferSize());
 
 			ID3D12Resource* uploadHeap = {};
 

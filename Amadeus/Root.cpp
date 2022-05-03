@@ -22,6 +22,7 @@ namespace Amadeus
 
 	Root::~Root()
 	{
+		Destroy();
 	}
 
 	void Root::Init()
@@ -43,7 +44,15 @@ namespace Amadeus
 		mFrameGraph->AddPass("SSAOPass", mDeviceResources);
 		mFrameGraph->AddPass("SSAOBlurPass", mDeviceResources);
 		mFrameGraph->AddPass("GBufferPass", mDeviceResources);
-		mFrameGraph->AddPass("TAAPass", mDeviceResources);
+		if (EngineVar::TAA_Enable)
+		{
+			mFrameGraph->AddPass("TAAPass", mDeviceResources);
+		}
+		if (EngineVar::Draw_Sky)
+		{
+			mFrameGraph->AddPass("SkyboxPass", mDeviceResources);
+		}
+		mFrameGraph->AddPass("GBufferTransparentPass", mDeviceResources);
 		mFrameGraph->AddPass("FinalPass", mDeviceResources);
 
 		Registry& registry = Registry::instance();
@@ -170,9 +179,12 @@ namespace Amadeus
 		LightManager& lightMananger = LightManager::Instance();
 		lightMananger.Init();
 
-		Gltf::LoadGltf(L"Sponza", mDeviceResources, mDescriptorManager);
+		Gltf::LoadGltf(L"DamagedHelmet", mDeviceResources, mDescriptorManager);
 
-		TextureManager::Instance().LoadFromFile(TEXTURE_EMPTY_ID, TextureType::OTHER, mDeviceResources, mDescriptorManager);
+		TextureManager::Instance().LoadFromFile(EngineVar::TEXTURE_WHITE_ID, TextureType::DEFAULT, mDeviceResources, mDescriptorManager);
+		TextureManager::Instance().LoadFromFile(EngineVar::TEXTURE_BLACK_ID, TextureType::DEFAULT, mDeviceResources, mDescriptorManager);
+		TextureManager::Instance().LoadFromFile(EngineVar::CUBEMAP_ENNIS_ID, TextureType::CUBE_MAP, mDeviceResources, mDescriptorManager);
+		TextureManager::Instance().LoadFromFile(EngineVar::TEXTURE_BRDF_LUT_ID, TextureType::DEFAULT, mDeviceResources, mDescriptorManager);
 
 		MeshManager& meshManager = MeshManager::Instance();
 		meshManager.Init();

@@ -104,6 +104,10 @@ namespace Amadeus
 
 		ID3D12Resource* GetD3D12Resource() { return mMaterialConstants.Get(); }
 
+		bool IsTransparent() { return mAlphaMode == MATERIAL_ALPHA_MODE::MATERIAL_BLEND; }
+
+		bool IsAlphaMask() { return mAlphaMode == MATERIAL_ALPHA_MODE::MATERIAL_MASK; }
+
 	private:
 		// Type Flag
 		UINT32 mType = 0;

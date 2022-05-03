@@ -16,5 +16,5 @@ namespace Amadeus
 
 	static constexpr UINT COMMON_RENDER_TARGET_SSAO_TABLE_INDEX = 6;
 
-	static constexpr UINT COMMON_SAMPLER_ROOT_TABLE_INDEX = 7;
+	static constexpr UINT COMMON_SAMPLER_ROOT_TABLE_INDEX = 8;
 }

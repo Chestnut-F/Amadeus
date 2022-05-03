@@ -33,7 +33,7 @@ namespace Amadeus
         textureDesc.DepthOrArraySize = mMetadata.arraySize;
         textureDesc.SampleDesc.Count = 1;
         textureDesc.SampleDesc.Quality = 0;
-        textureDesc.Dimension = static_cast<D3D12_RESOURCE_DIMENSION>(mMetadata.dimension);
+        textureDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
 
         const CD3DX12_HEAP_PROPERTIES defaultHeapProperties = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
         ThrowIfFailed(device->GetD3DDevice()->CreateCommittedResource(
@@ -49,9 +49,8 @@ namespace Amadeus
         srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
         srvDesc.Format = mMetadata.format;
         if (mMetadata.IsCubemap()) {
-            srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2DARRAY;
-            srvDesc.Texture2DArray.MipLevels = mMetadata.mipLevels;
-            srvDesc.Texture2DArray.ArraySize = mMetadata.arraySize;
+            srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURECUBE;
+            srvDesc.TextureCube.MipLevels = mMetadata.mipLevels;
         }
         else {
             srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
@@ -91,7 +90,7 @@ namespace Amadeus
         textureDesc.DepthOrArraySize = mMetadata.arraySize;
         textureDesc.SampleDesc.Count = 1;
         textureDesc.SampleDesc.Quality = 0;
-        textureDesc.Dimension = static_cast<D3D12_RESOURCE_DIMENSION>(mMetadata.dimension);
+        textureDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
 
         const CD3DX12_HEAP_PROPERTIES defaultHeapProperties = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
         ThrowIfFailed(device->GetD3DDevice()->CreateCommittedResource(
@@ -107,9 +106,8 @@ namespace Amadeus
         srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
         srvDesc.Format = mMetadata.format;
         if (mMetadata.IsCubemap()) {
-            srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2DARRAY;
-            srvDesc.Texture2DArray.MipLevels = mMetadata.mipLevels;
-            srvDesc.Texture2DArray.ArraySize = mMetadata.arraySize;
+            srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURECUBE;
+            srvDesc.TextureCube.MipLevels = mMetadata.mipLevels;
         }
         else {
             srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
@@ -124,13 +122,34 @@ namespace Amadeus
     {
         //commandList->Reset(device->GetCommandAllocator(), nullptr);
 
-        const auto& images = mImage.GetImages();
-        D3D12_SUBRESOURCE_DATA textureData = {};
-        textureData.pData = mImage.GetPixels();
-        textureData.RowPitch = images->rowPitch;
-        textureData.SlicePitch = images->slicePitch;
+        if (mMetadata.IsCubemap())
+        {
+            ThrowIfFailed(PrepareUpload(device->GetD3DDevice(), mImage.GetImages(), mImage.GetImageCount(), mMetadata, mSubresources));
+            UINT64 uploadBufferSize = GetRequiredIntermediateSize(mTextureResource.Get(), 0, static_cast<UINT>(mSubresources.size()));
 
-        UpdateSubresources<1>(commandList, mTextureResource.Get(), uploadHeap, 0, 0, 1, &textureData);
+            const CD3DX12_HEAP_PROPERTIES uploadHeapProperties = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
+            CD3DX12_RESOURCE_DESC resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(uploadBufferSize);
+
+            ThrowIfFailed(device->GetD3DDevice()->CreateCommittedResource(
+                &uploadHeapProperties,
+                D3D12_HEAP_FLAG_NONE,
+                &resourceDesc,
+                D3D12_RESOURCE_STATE_GENERIC_READ,
+                nullptr,
+                IID_PPV_ARGS(&mUploadHeap)));
+
+            UpdateSubresources(commandList, mTextureResource.Get(), mUploadHeap.Get(), 0, 0, mSubresources.size(), mSubresources.data());
+        }
+        else
+        {
+            const auto& images = mImage.GetImages();
+            D3D12_SUBRESOURCE_DATA textureData = {};
+            textureData.pData = mImage.GetPixels();
+            textureData.RowPitch = images->rowPitch;
+            textureData.SlicePitch = images->slicePitch;
+
+            UpdateSubresources<1>(commandList, mTextureResource.Get(), uploadHeap, 0, 0, 1, &textureData);
+        }
 
         const CD3DX12_RESOURCE_BARRIER resourceBarrier = CD3DX12_RESOURCE_BARRIER::Transition(
             mTextureResource.Get(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
@@ -164,6 +183,12 @@ namespace Amadeus
 
     void Texture::Destroy()
     {
+        if (mMetadata.IsCubemap())
+        {
+            mUploadHeap->Release();
+            mSubresources.clear();
+        }
+
         mTextureResource->Release();
     }
 

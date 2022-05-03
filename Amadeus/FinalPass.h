@@ -26,5 +26,8 @@ namespace Amadeus
 
 	private:
 		SharedPtr<FrameGraphResource> mBaseColor;
+
+		SharedPtr<FrameGraphResource> mSky;
+		SharedPtr<FrameGraphResource> mTransparent;
 	};
 }

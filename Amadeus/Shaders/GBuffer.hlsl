@@ -16,6 +16,11 @@ cbuffer CameraConstants : register(b0)
 cbuffer MaterialConstants : register(b2)
 {
     float4 baseColorFactor;
+    float metallicFactor;
+    float roughnessFactor;
+    float normalScale;
+    float occlusionStrength;
+    float3 emissiveFactor;
 };
 
 SamplerState modelSampler : register(s0);
@@ -28,6 +33,8 @@ Texture2D<float4> normalTexture             : register(t4);
 
 Texture2D<float>  shadowMap                 : register(t5);
 Texture2D<float>  ssaoTexture               : register(t6);
+Texture2D<float2> brdflutTexture            : register(t7);
+TextureCube       prefilteredMapTexture     : register(t8);
 
 struct VSOutput
 {
@@ -97,6 +104,29 @@ float2 GetVelocity(float4 PrevCoord, float4 CurCoord)
     return velocity;
 }
 
+float3 PrefilteredReflection(float3 R, float roughness)
+{
+    const float MAX_REFLECTION_LOD = 10.0; // todo: param/const
+    float lod = roughness * MAX_REFLECTION_LOD;
+    float lodf = floor(lod);
+    float lodc = ceil(lod);
+    float3 a = prefilteredMapTexture.SampleLevel(defaultSampler, R, lodf).rgb;
+    float3 b = prefilteredMapTexture.SampleLevel(defaultSampler, R, lodc).rgb;
+    return lerp(a, b, lod - lodf);
+}
+
+float3 PrefilteredIrradiance(float3 N)
+{
+    const float MAX_REFLECTION_LOD = 10.0;
+    float3 irradiance = prefilteredMapTexture.SampleLevel(defaultSampler, N, MAX_REFLECTION_LOD).rgb;
+    return irradiance;
+}
+
+float3 FresnelSchlick(float3 F0, float cosTheta)
+{
+    return F0 + (1.0 - F0) * pow(1.0 - cosTheta, 5.0);
+}
+
 [earlydepthstencil]
 [RootSignature(Renderer_RootSig)]
 GBuffer main(VSOutput input) : SV_TARGET
@@ -105,10 +135,35 @@ GBuffer main(VSOutput input) : SV_TARGET
 
     output.normal = float4(normalize(input.normal) * 0.5 + 0.5, 1.0);
 
-    float shadow = GetDirectionalShadow(input.shadowCoord);
-    float occlusion = GetAO(input.position);
+    //float shadow = GetDirectionalShadow(input.shadowCoord);
+    //float occlusion = GetAO(input.position);
+    float shadow = 1.0;
 
-    output.baseColor = occlusion * shadow * baseColorTexture.Sample(modelSampler, input.uv) * baseColorFactor;
+    float3 N = input.normal;
+    float3 V = normalize(cameraPosWorld - input.positionW);
+    float3 R = 2 * dot(V, N) * N - V;
+    float NoV = max(dot(N, V), 0.0);
+
+    float3 albedo = baseColorFactor.rgb * baseColorTexture.Sample(defaultSampler, input.uv).rgb;
+    float metallic = metallicFactor * metallicRoughnessTexture.Sample(defaultSampler, input.uv).b;
+    float roughness = roughnessFactor * metallicRoughnessTexture.Sample(defaultSampler, input.uv).g;
+    float3 emissive = emissiveFactor * emissiveTexture.Sample(defaultSampler, input.uv).rgb;
+    float occlusion = occlusionStrength * occlusionTexture.Sample(defaultSampler, input.uv).r;
+
+    float3 F0 = float3(0.04, 0.04, 0.04);
+    F0 = lerp(F0, albedo, metallic);
+    float3 F = FresnelSchlick(F0, NoV);
+    float3 kd = lerp(1.0 - F, 0.0, metallic);
+
+    float2 brdf = brdflutTexture.Sample(defaultSampler, float2(NoV, roughness)).rg;
+    float3 reflection = PrefilteredReflection(R, roughness).rgb;
+    float3 irradiance = PrefilteredIrradiance(N).rgb;
+
+    float3 diffuse = occlusion * kd * irradiance * albedo;
+    float3 specular = reflection * (F * brdf.x + brdf.y);
+    float3 ambient = emissive + diffuse + specular;
+
+    output.baseColor = occlusion * shadow * float4(ambient, 1.0);
     output.metallicSpecularRoughness = float4(1.0, 1.0, 1.0, 1.0);
     output.velocity = GetVelocity(input.prevCoord, input.curCoord);
 

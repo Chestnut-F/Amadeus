@@ -41,6 +41,8 @@ namespace Amadeus
 
 	void DescriptorManager::Destroy()
 	{
+		//mSrvHeap->Release();
+		//mSamplerHeap->Release();
 	}
 
 	void DescriptorManager::CreateSrvHeap(std::shared_ptr<DeviceResources> device)

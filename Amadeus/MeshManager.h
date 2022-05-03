@@ -32,6 +32,9 @@ namespace Amadeus
 		void Render(SharedPtr<DeviceResources> device, 
 			SharedPtr<DescriptorCache> descriptorCache, ID3D12GraphicsCommandList* commandList);
 
+		void RenderTransparent(SharedPtr<DeviceResources> device,
+			SharedPtr<DescriptorCache> descriptorCache, ID3D12GraphicsCommandList* commandList);
+
 		Mesh* GetMesh(UINT64 index) { return mMeshList.at(index); }
 
 		const Vector<Mesh*>& GetMeshList() { return mMeshList; }

@@ -123,6 +123,10 @@ namespace Amadeus
 	{
 		for (auto& primitive : mPrimitiveList)
 		{
+			if (primitive->IsTransparent())
+			{
+				continue;
+			}
 			primitive->RenderShadow(device, descriptorCache, commandList);
 		}
 	}
@@ -132,6 +136,23 @@ namespace Amadeus
 	{
 		for (auto& primitive : mPrimitiveList)
 		{
+			if (primitive->IsTransparent())
+			{
+				continue;
+			}
+			primitive->Render(device, descriptorCache, commandList);
+		}
+	}
+
+	void Mesh::RenderTransparent(
+		SharedPtr<DeviceResources> device, SharedPtr<DescriptorCache> descriptorCache, ID3D12GraphicsCommandList* commandList)
+	{
+		for (auto& primitive : mPrimitiveList)
+		{
+			if (!primitive->IsTransparent())
+			{
+				continue;
+			}
 			primitive->Render(device, descriptorCache, commandList);
 		}
 	}

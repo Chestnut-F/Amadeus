@@ -112,13 +112,16 @@ namespace Amadeus
 
 	XMMATRIX Camera::GetProjectionMatrix(UINT i)
 	{
-		XMFLOAT2 hammersley = Hammersley2d(i, mNumSamples);
 		XMMATRIX res = XMMatrixPerspectiveFovLH(mFov, mAspectRatio, mNearPlane, mFarPlane);
-		float jitterX = (hammersley.x * 2.f - 1.f) / (float)SCREEN_WIDTH;
-		float jitterY = (hammersley.y * 2.f - 1.f) / (float)SCREEN_HEIGHT;
-		mCameraConstantBuffer.jitter = XMFLOAT2(jitterX, -jitterY);
-		res.r[2].m128_f32[0] += jitterX;
-		res.r[2].m128_f32[1] += jitterY;
+		if (EngineVar::TAA_Enable)
+		{
+			XMFLOAT2 hammersley = Hammersley2d(i, mNumSamples);
+			float jitterX = (hammersley.x * 2.f - 1.f) / (float)SCREEN_WIDTH;
+			float jitterY = (hammersley.y * 2.f - 1.f) / (float)SCREEN_HEIGHT;
+			mCameraConstantBuffer.jitter = XMFLOAT2(jitterX, -jitterY);
+			res.r[2].m128_f32[0] += jitterX;
+			res.r[2].m128_f32[1] += jitterY;
+		}
 		return res;
 	}
 

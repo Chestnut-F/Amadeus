@@ -30,6 +30,7 @@
 #include <dxgidebug.h>
 #endif
 
+#include "Common/EngineVar.h"
 #include "Common/AmadeusHelper.h"
 #include "Common/StepTimer.h"
 #include "Common/DeviceResources.h"

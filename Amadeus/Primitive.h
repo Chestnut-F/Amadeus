@@ -84,6 +84,8 @@ namespace Amadeus
 
 		const Boundary& GetBoundary() { return mBoundary; }
 
+		bool IsTransparent();
+
 	private:
 		typedef D3D12_PRIMITIVE_TOPOLOGY PrimitiveMode;
 		PrimitiveMode mMode;

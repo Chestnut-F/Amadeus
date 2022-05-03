@@ -192,6 +192,15 @@
     <ClInclude Include="TAAPass.h">
       <Filter>Render Pass\Header</Filter>
     </ClInclude>
+    <ClInclude Include="Common\EngineVar.h">
+      <Filter>Amadeus\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SkyboxPass.h">
+      <Filter>Render Pass\Header</Filter>
+    </ClInclude>
+    <ClInclude Include="GBufferTransparentPass.h">
+      <Filter>Render Pass\Header</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Root.cpp">
@@ -290,6 +299,15 @@
     <ClCompile Include="TAAPass.cpp">
       <Filter>Render Pass\Source</Filter>
     </ClCompile>
+    <ClCompile Include="Common\EngineVar.cpp">
+      <Filter>Amadeus\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SkyboxPass.cpp">
+      <Filter>Render Pass\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="GBufferTransparentPass.cpp">
+      <Filter>Render Pass\Source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\GBuffer.hlsl">
@@ -339,6 +357,18 @@
     </FxCompile>
     <FxCompile Include="Shaders\ScreenSpaceVS.hlsl">
       <Filter>Shader Files\VertexShaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\SkyboxRS.hlsli">
+      <Filter>Shader Files\Common</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\SkyboxVS.hlsl">
+      <Filter>Shader Files\VertexShaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\SkyboxPS.hlsl">
+      <Filter>Shader Files\PixelShaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\GBufferTransparent.hlsl">
+      <Filter>Shader Files\PixelShaders</Filter>
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
